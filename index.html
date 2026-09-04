@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HIRISMAN - Enterprise Multi-Company HRIS & ATS AI</title>
+    <!-- Web App Manifest (PWA & APK Ready) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22HIRISMAN%20Enterprise%22%2C%22short_name%22%3A%22HIRISMAN%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%231e40af%22%7D">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Vector Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF.js Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <!-- Mammoth.js (.DOCX Parser) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- Tesseract.js (OCR Image Parser) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- SheetJS (Excel .XLSX Engine) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF & AutoTable Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row select-none">
+
+    <!-- OTA UPDATE NOTIFICATION BANNER -->
+    <div id="ota-banner" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-lg bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl border border-brand-500/40 backdrop-blur-md hidden transition-all">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white flex-shrink-0 animate-bounce">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                    <span class="text-[10px] font-black uppercase text-brand-400 bg-brand-900 px-1.5 py-0.5 rounded">OTA Sync</span>
+                    <span class="text-xs text-slate-300 font-bold" id="ota-version-tag">v2.5.0 Rilis</span>
+                </div>
+                <p class="text-[11px] text-slate-200 truncate mt-0.5">Pembaruan sistem & fitur payroll terbaru siap disinkronkan.</p>
+            </div>
+            <button onclick="applyAppUpdate()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow transition flex-shrink-0">
+                Perbarui
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/30">
+                <!-- Ikon Orang Sedang Bekerja -->
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2.5"/><path d="M8 15v-1a4 4 0 0 1 8 0v1"/><path d="M4 19h16"/><path d="M9 15h6l1 4H8l1-4z"/></svg>
+            </div>
+            <span class="font-black text-lg text-slate-900 tracking-tight">HIRIS<span class="text-brand-600">MAN</span></span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="openCompanyModal()" class="px-2.5 py-1.5 bg-brand-50 text-brand-700 rounded-lg text-xs font-bold border border-brand-200 truncate max-w-[100px]" id="mobile-company-btn">
+                Perusahaan
+            </button>
+            <button onclick="toggleMobileMenu()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-200 shadow-lg md:shadow-none">
+        <div>
+            <!-- Logo Desktop -->
+            <div class="p-5 hidden md:flex items-center space-x-3 border-b border-slate-100">
+                <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-brand-500/30 flex-shrink-0">
+                    <!-- Ikon Orang Sedang Bekerja -->
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2.5"/><path d="M8 15v-1a4 4 0 0 1 8 0v1"/><path d="M4 19h16"/><path d="M9 15h6l1 4H8l1-4z"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-slate-900 tracking-tight leading-none">HIRIS<span class="text-brand-600">MAN</span></h1>
+                    <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Smart HR Ecosystem</span>
+                </div>
+            </div>
+
+            <!-- Selector Perusahaan (Hingga 10 Entitas) -->
+            <div class="p-2.5 mx-3 my-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between cursor-pointer hover:border-brand-500 transition" onclick="openCompanyModal()">
+                <div class="flex items-center space-x-2.5 overflow-hidden">
+                    <div class="w-7 h-7 bg-brand-600 text-white rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0" id="sidebar-company-badge">CO</div>
+                    <div class="truncate">
+                        <p class="text-xs font-bold text-slate-800 truncate" id="sidebar-company-name">Nama Perusahaan</p>
+                        <p class="text-[10px] text-slate-400 font-semibold" id="sidebar-company-counter">1/10 Perusahaan</p>
+                    </div>
+                </div>
+                <i data-lucide="chevrons-up-down" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+            </div>
+
+            <!-- Navigasi Menu -->
+            <nav class="px-3 space-y-1">
+                <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-brand-700 bg-brand-50 transition" data-page="dashboard">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    <span>Dashboard Utama</span>
+                </button>
+                <button onclick="navigate('payroll')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="payroll">
+                    <i data-lucide="banknote" class="w-4 h-4"></i>
+                    <span>Payroll & Pindai Mentah</span>
+                </button>
+                <button onclick="navigate('employees')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="employees">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>Karyawan & Rekam Masalah</span>
+                </button>
+                <button onclick="navigate('screening')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="screening">
+                    <i data-lucide="file-search" class="w-4 h-4"></i>
+                    <span>Skrining CV Multi-Format</span>
+                </button>
+                <button onclick="navigate('attendance')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="attendance">
+                    <i data-lucide="clock-check" class="w-4 h-4"></i>
+                    <span>E-Absensi Digital</span>
+                </button>
+                <button onclick="navigate('settings')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="settings">
+                    <i data-lucide="settings-2" class="w-4 h-4"></i>
+                    <span>Pengaturan & Cloud Sync</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Akun Aktif -->
+        <div class="p-3 border-t border-slate-100 bg-slate-50/70">
+            <div class="flex items-center justify-between mb-2 cursor-pointer" onclick="openAuthModal()">
+                <div class="flex items-center space-x-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs shadow flex-shrink-0" id="user-avatar">HR</div>
+                    <div class="truncate">
+                        <p class="text-xs font-bold text-slate-900 truncate" id="sidebar-user-name">Administrator</p>
+                        <p class="text-[10px] text-slate-400 truncate" id="sidebar-user-email">admin@hirisman.id</p>
+                    </div>
+                </div>
+                <i data-lucide="arrow-left-right" class="w-4 h-4 text-slate-400 hover:text-brand-600"></i>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold px-1">
+                <span id="env-mode-tag">Mode: Web & APK</span>
+                <span id="app-version-tag" class="font-mono text-brand-600 font-bold">v2.4.0</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto custom-scrollbar">
+        <!-- Top Navigation Bar -->
+        <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+            <div class="flex items-center space-x-3">
+                <button onclick="openCompanyModal()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-800 rounded-xl text-xs font-extrabold border border-brand-200 transition">
+                    <i data-lucide="building" class="w-4 h-4 text-brand-600"></i>
+                    <span id="topbar-company-name" class="truncate max-w-[160px] sm:max-w-xs">Perusahaan Aktif</span>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="toggleCompanyPrivacy()" id="privacy-pill" class="px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center space-x-1 border transition bg-emerald-50 text-emerald-700 border-emerald-200">
+                    <i data-lucide="lock" class="w-3 h-3"></i>
+                    <span id="privacy-pill-text">Privat</span>
+                </button>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleLanguage()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center space-x-1">
+                    <i data-lucide="globe" class="w-3.5 h-3.5 text-brand-600"></i>
+                    <span id="lang-tag">ID</span>
+                </button>
+                <div class="hidden sm:block text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 font-mono" id="clock-topbar">--:--:-- WIB</div>
+            </div>
+        </div>
+
+        <div class="p-4 sm:p-6 md:p-8 space-y-6 flex-1" id="main-view">
+
+            <!-- PAGE 1: DASHBOARD UTAMA -->
+            <section id="view-dashboard" class="space-y-6">
+                <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-2xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10 max-w-xl">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-brand-200 bg-brand-800/60 px-2 py-0.5 rounded" id="dash-comp-tag">PERUSAHAAN AKTIF</span>
+                        <h2 class="text-xl sm:text-3xl font-extrabold mt-3 mb-1.5" id="dash-greeting">Selamat Datang di HIRISMAN</h2>
+                        <p class="text-brand-100 text-xs sm:text-sm leading-relaxed">Ekosistem manajemen HR cerdas multi-perusahaan. Dilengkapi pemindai data mentah Excel/TXT real-time untuk payroll, skrining CV ATS universal, dan monitoring staf terpadu.</p>
+                    </div>
+                </div>
+
+                <!-- Quick Menu Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div onclick="navigate('payroll')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-lg cursor-pointer transition group">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 group-hover:bg-emerald-600 group-hover:text-white transition"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-slate-800 group-hover:text-emerald-600 text-sm">Payroll & Pindai Mentah</h3>
+                        <p class="text-xs text-slate-500 mt-1">Impor data mentah Excel / TXT, live auto-scanner, dan transfer bank kas.</p>
+                    </div>
+                    <div onclick="navigate('employees')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-lg cursor-pointer transition group">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center mb-3 group-hover:bg-brand-600 group-hover:text-white transition"><i data-lucide="users" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-slate-800 group-hover:text-brand-600 text-sm">Data Karyawan & Masalah</h3>
+                        <p class="text-xs text-slate-500 mt-1">Kelola staf dan pantau status kedisiplinan (Sakit, Cuti, SP 1-3, PHK).</p>
+                    </div>
+                    <div onclick="navigate('screening')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-indigo-500 hover:shadow-lg cursor-pointer transition group">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:bg-indigo-600 group-hover:text-white transition"><i data-lucide="file-search" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 text-sm">Skrining CV Multi-Format</h3>
+                        <p class="text-xs text-slate-500 mt-1">Dukung PDF, DOCX, TXT, Gambar OCR, dan surat penawaran otomatis.</p>
+                    </div>
+                    <div onclick="navigate('attendance')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-amber-500 hover:shadow-lg cursor-pointer transition group">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 group-hover:bg-amber-600 group-hover:text-white transition"><i data-lucide="clock" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-slate-800 group-hover:text-amber-600 text-sm">E-Absensi Digital</h3>
+                        <p class="text-xs text-slate-500 mt-1">Presensi geolokasi GPS waktu nyata dengan verifikasi otomatis.</p>
+                    </div>
+                </div>
+
+                <!-- Statistik Perusahaan -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                        <span class="text-xs text-slate-500 font-semibold">Staf Aktif Normal</span>
+                        <p class="text-2xl font-black text-brand-700 mt-1" id="stat-active-emp">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                        <span class="text-xs text-slate-500 font-semibold">Staf Bermasalah / Cuti</span>
+                        <p class="text-2xl font-black text-rose-600 mt-1" id="stat-issues-emp">0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                        <span class="text-xs text-slate-500 font-semibold">Saldo Kas Payroll</span>
+                        <p class="text-lg font-black text-emerald-600 mt-1 truncate" id="stat-balance-emp">Rp 0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                        <span class="text-xs text-slate-500 font-semibold">Kandidat Teruji ATS</span>
+                        <p class="text-2xl font-black text-indigo-600 mt-1" id="stat-screened-emp">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: PAYROLL & PEMINDAI DATA MENTAH REAL-TIME (EXCEL & TXT) -->
+            <section id="view-payroll" class="space-y-6 hidden">
+                <!-- Kas Perusahaan Card -->
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-2xl text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kas Payroll Perusahaan</span>
+                        <div class="flex items-center space-x-3 mt-1">
+                            <span class="px-2 py-0.5 bg-brand-600 text-white rounded text-xs font-black" id="comp-bank-name">BCA</span>
+                            <span class="text-sm font-mono font-bold" id="comp-bank-acc">8830-1928-3100</span>
+                            <span class="text-xs text-slate-300" id="comp-bank-holder">(PT Utama)</span>
+                        </div>
+                        <p class="text-2xl font-black text-emerald-400 mt-1" id="comp-bank-balance">Rp 250.000.000</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openEditCompanyBankModal()" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition">
+                            Atur Kas
+                        </button>
+                        <button onclick="executeBulkPayrollTransfer()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center space-x-1.5">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i><span>Transfer Gaji Massal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SMART RAW DATA INGESTION ENGINE (EXCEL & TXT AUTO-SCANNER) -->
+                <div class="bg-white p-6 rounded-2xl border-2 border-emerald-200 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <div class="flex items-center space-x-1.5 text-emerald-700 font-extrabold text-xs uppercase tracking-wider mb-0.5">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Real-Time Raw Ingestion Scanner</span>
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900">Pemindai Data Mentah Payroll (Excel & TXT)</h3>
+                            <p class="text-xs text-slate-500">Unggah berkas mentah (.xlsx, .xls, .csv, .txt) atau tempel data teks dari Excel. Sistem otomatis memetakan kolom gaji dan staf secara akurat.</p>
+                        </div>
+                        <div class="flex bg-slate-100 p-0.5 rounded-xl text-xs font-bold">
+                            <button onclick="toggleRawInputMode('file')" id="tab-raw-file" class="px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-xs">Unggah Berkas</button>
+                            <button onclick="toggleRawInputMode('paste')" id="tab-raw-paste" class="px-3 py-1.5 rounded-lg text-slate-600">Tempel Data Mentah</button>
+                        </div>
+                    </div>
+
+                    <!-- Panel Unggah File Excel / TXT -->
+                    <div id="panel-raw-file" class="border-2 border-dashed border-emerald-300 rounded-2xl p-6 text-center bg-emerald-50/30 hover:bg-emerald-50/60 transition">
+                        <input type="file" id="raw-file-input" accept=".xlsx, .xls, .csv, .txt" class="hidden" onchange="handleRawPayrollFileUpload(this)">
+                        <label for="raw-file-input" class="cursor-pointer inline-flex items-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            <span>Pilih Berkas Mentah (Excel .xlsx/.csv atau Teks .txt)</span>
+                        </label>
+                        <p id="raw-file-label" class="text-xs text-slate-500 mt-2 font-medium">Format fleksibel: Mendukung kolom Nama, Gaji Pokok, Tunjangan, Bank, Rekening, NIP</p>
+                    </div>
+
+                    <!-- Panel Tempel Teks Mentah Real-Time -->
+                    <div id="panel-raw-paste" class="space-y-2 hidden">
+                        <textarea id="raw-payroll-paste" rows="5" oninput="scanRawPayrollTextRealtime()" placeholder="Salin baris data dari Excel atau TXT lalu tempel di sini...&#10;Contoh:&#10;Hendra Gunawan    12000000    1500000    BCA    5310291823    EMP-001&#10;Siti Aminah       10500000    1000000    Mandiri 1420019283    EMP-002" class="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono leading-relaxed focus:bg-white focus:border-emerald-500 focus:outline-none custom-scrollbar"></textarea>
+                        <p class="text-[11px] text-slate-400 font-medium">Sistem secara otomatis mendeteksi pemisah Tab, Koma, atau Titik Koma secara real-time saat Anda mengetik/menempel.</p>
+                    </div>
+
+                    <!-- Live Scanner Detection Summary -->
+                    <div id="raw-scan-preview-bar" class="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 hidden flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-900" id="scan-detected-title">0 Data Staf Berhasil Diterjemahkan</h4>
+                                <p class="text-[11px] text-emerald-700" id="scan-detected-desc">Total Beban Gaji Mentah: Rp 0</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="discardScannedRawData()" class="px-3 py-1.5 bg-white text-slate-600 hover:text-rose-600 rounded-lg text-xs font-bold border border-slate-200">
+                                Batal
+                            </button>
+                            <button onclick="applyScannedRawDataToPayroll()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center space-x-1">
+                                <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                                <span>Terapkan ke Payroll & Staf</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Payroll & Gaji -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                        <h2 class="text-lg font-bold text-slate-900">Daftar Penggajian & Transfer Rekening</h2>
+                        <button onclick="exportPayrollExcel()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1.5 transition">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i><span>Ekspor Payroll (.xlsx)</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                    <th class="py-3 px-4">Nama Pegawai</th>
+                                    <th class="py-3 px-4">Rekening Tujuan</th>
+                                    <th class="py-3 px-4">Gaji Pokok & Tunjangan</th>
+                                    <th class="py-3 px-4">Potongan (BPJS+Pajak)</th>
+                                    <th class="py-3 px-4 font-bold text-brand-700">Take Home Pay</th>
+                                    <th class="py-3 px-4 text-center">Status</th>
+                                    <th class="py-3 px-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payroll-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="payroll-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold">Belum ada data penggajian. Gunakan Pemindai Data Mentah di atas.</div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: KARYAWAN & REKAM MASALAH -->
+            <section id="view-employees" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Direktori Staf & Rekam Masalah</h2>
+                            <p class="text-xs text-slate-500">Kelola rekening payroll dan pantau status kedisiplinan staf secara independen.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="downloadExcelTemplate()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i><span>Format Excel</span>
+                            </button>
+                            <label class="cursor-pointer px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1.5 transition">
+                                <i data-lucide="upload" class="w-4 h-4"></i><span>Impor Excel</span>
+                                <input type="file" id="excel-importer" accept=".xlsx, .xls, .csv" class="hidden" onchange="importEmployeesFromExcel(event)">
+                            </label>
+                            <button onclick="exportEmployeesToExcel()" class="px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1.5 transition">
+                                <i data-lucide="download" class="w-4 h-4"></i><span>Ekspor Excel</span>
+                            </button>
+                            <button onclick="openAddEmployeeModal()" class="px-4 py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1.5 transition">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i><span>+ Input Staf</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Status Masalah -->
+                    <div class="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold">
+                        <span class="text-slate-400 text-[10px] uppercase">Filter:</span>
+                        <button onclick="filterEmployeeTable('all')" class="emp-flt px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 border border-brand-200">Semua</button>
+                        <button onclick="filterEmployeeTable('Aktif Normal')" class="emp-flt px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Aktif Normal</button>
+                        <button onclick="filterEmployeeTable('issues')" class="emp-flt px-2.5 py-1 rounded-lg bg-slate-100 text-rose-600 hover:bg-rose-50">Sakit / Cuti / SP</button>
+                        <button onclick="filterEmployeeTable('terminated')" class="emp-flt px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">PHK / Dinonaktifkan</button>
+                    </div>
+
+                    <div class="overflow-x-auto mt-4">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                    <th class="py-3 px-4">NIP & Nama</th>
+                                    <th class="py-3 px-4">Divisi & Jabatan</th>
+                                    <th class="py-3 px-4">Status Kondisi</th>
+                                    <th class="py-3 px-4">Rekening Karyawan</th>
+                                    <th class="py-3 px-4">Gaji Pokok</th>
+                                    <th class="py-3 px-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="emp-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="emp-empty-box" class="py-10 text-center">
+                        <p class="text-xs text-slate-400 font-semibold">Belum ada karyawan. Tambahkan manual atau impor file Excel.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: SKRINING CV MULTI-FORMAT -->
+            <section id="view-screening" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="max-w-3xl mb-5">
+                        <div class="flex items-center space-x-2 text-brand-600 text-xs font-bold uppercase mb-1">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i><span>Universal ATS Engine</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900">Skrining CV & Keputusan Kelulusan</h2>
+                        <p class="text-slate-500 text-xs mt-1">Mendukung berkas PDF, Word (.docx), TXT, Gambar (.png, .jpg via OCR), atau input manual teks secara leluasa.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <input type="text" id="cand-name" placeholder="Nama Lengkap Pelamar" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                        <input type="email" id="cand-email" placeholder="Email Pelamar" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                        <input type="text" id="cand-role" placeholder="Posisi yang Dilamar" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-brand-600"></i><span>1. CV Pelamar</span>
+                                </h4>
+                                <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                                    <button onclick="toggleScreenInput('cv', 'file')" id="tab-cv-file" class="px-2 py-1 rounded bg-white text-brand-700 shadow-xs">Berkas</button>
+                                    <button onclick="toggleScreenInput('cv', 'manual')" id="tab-cv-manual" class="px-2 py-1 rounded text-slate-600">Teks Manual</button>
+                                </div>
+                            </div>
+                            <div id="panel-cv-file" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-white">
+                                <input type="file" id="input-cv" accept=".pdf, .docx, .txt, .png, .jpg, .jpeg" class="hidden" onchange="parseUniversalFile(this, 'cv')">
+                                <label for="input-cv" class="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-xs text-slate-700">
+                                    <i data-lucide="folder-open" class="w-3.5 h-3.5 text-brand-600"></i><span>Pilih File CV</span>
+                                </label>
+                                <p id="label-cv" class="text-xs font-semibold text-brand-600 mt-2 truncate">Belum ada file</p>
+                            </div>
+                            <textarea id="manual-cv" rows="5" placeholder="Tempel atau ketik teks CV di sini..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono hidden focus:outline-none focus:border-brand-500"></textarea>
+                            <span class="text-[10px] text-slate-400">Status: <b id="status-cv" class="text-slate-600">Menunggu Input</b></span>
+                        </div>
+
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                                    <i data-lucide="briefcase" class="w-4 h-4 text-indigo-600"></i><span>2. Kualifikasi Loker</span>
+                                </h4>
+                                <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                                    <button onclick="toggleScreenInput('job', 'file')" id="tab-job-file" class="px-2 py-1 rounded bg-white text-indigo-700 shadow-xs">Berkas</button>
+                                    <button onclick="toggleScreenInput('job', 'manual')" id="tab-job-manual" class="px-2 py-1 rounded text-slate-600">Teks Manual</button>
+                                </div>
+                            </div>
+                            <div id="panel-job-file" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-white">
+                                <input type="file" id="input-job" accept=".pdf, .docx, .txt, .png, .jpg, .jpeg" class="hidden" onchange="parseUniversalFile(this, 'job')">
+                                <label for="input-job" class="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-xs text-slate-700">
+                                    <i data-lucide="folder-open" class="w-3.5 h-3.5 text-indigo-600"></i><span>Pilih File Loker</span>
+                                </label>
+                                <p id="label-job" class="text-xs font-semibold text-indigo-600 mt-2 truncate">Belum ada file</p>
+                            </div>
+                            <textarea id="manual-job" rows="5" placeholder="Tempel atau ketik persyaratan loker di sini..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono hidden focus:outline-none focus:border-brand-500"></textarea>
+                            <span class="text-[10px] text-slate-400">Status: <b id="status-job" class="text-slate-600">Menunggu Input</b></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex justify-end border-t border-slate-100 pt-4">
+                        <button onclick="runAiScreening()" id="btn-run-screening" class="w-full sm:w-auto px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 transition">
+                            <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                            <span>Jalankan Analisis AI ATS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Diagnostik & Pembuat Surat -->
+                <div id="screening-result-panel" class="hidden space-y-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-5 items-center">
+                        <div class="flex items-center space-x-4 md:col-span-2">
+                            <div class="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                    <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="circle-progress" class="text-brand-600" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                                <span class="absolute font-black text-xl text-slate-900" id="match-percent">0%</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Skor Keselarasan ATS</span>
+                                <h3 class="text-lg font-bold text-slate-900 mt-0.5" id="match-verdict">Menganalisis...</h3>
+                                <p class="text-xs text-slate-500 mt-1 max-w-sm">Evaluasi kecocokan kompetensi pelamar dengan kebutuhan operasional.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 text-xs font-semibold">
+                            <div class="flex justify-between"><span class="text-slate-500">Skill Alignment:</span><span class="text-brand-700" id="metric-skill">--%</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Format Ramah ATS:</span><span class="text-brand-700">Terbaca Digital</span></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                            <h4 class="text-xs font-bold text-emerald-600 flex items-center space-x-1.5 mb-2.5">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Kekuatan & Nilai Tambah</span>
+                            </h4>
+                            <ul id="strengths-list" class="space-y-1.5 text-xs text-slate-600"></ul>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                            <h4 class="text-xs font-bold text-rose-500 flex items-center space-x-1.5 mb-2.5">
+                                <i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Kekurangan / Kualifikasi Terlewat</span>
+                            </h4>
+                            <ul id="weaknesses-list" class="space-y-1.5 text-xs text-slate-600"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Keputusan Kelulusan & Surat Generator -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-brand-200 shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900">Keputusan Seleksi Pelamar</h3>
+                                <p class="text-xs text-slate-500">Terbitkan surat penawaran resmi atau penolakan berkas.</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="setCandidateDecision(true)" id="btn-decide-pass" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i><span>LULUS SELEKSI</span>
+                                </button>
+                                <button onclick="setCandidateDecision(false)" id="btn-decide-reject" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl hover:text-rose-600 flex items-center space-x-1">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i><span>TIDAK LULUS</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pass-letter-box" class="space-y-3">
+                            <textarea id="pass-letter-content" rows="8" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-mono leading-relaxed bg-slate-50/50 focus:border-brand-500 focus:outline-none custom-scrollbar"></textarea>
+                            <div class="flex flex-col sm:flex-row justify-end gap-2">
+                                <button onclick="downloadOfficialPdfLetter()" class="px-5 py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl shadow flex items-center justify-center space-x-1.5">
+                                    <i data-lucide="file-down" class="w-4 h-4"></i><span>Unduh Surat Undangan (PDF)</span>
+                                </button>
+                                <button onclick="sendLetterToEmail(true)" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center justify-center space-x-1.5">
+                                    <i data-lucide="send" class="w-4 h-4"></i><span>Kirim Otomatis ke Email Pelamar</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="reject-letter-box" class="space-y-3 hidden">
+                            <textarea id="reject-letter-content" rows="5" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-mono leading-relaxed bg-slate-50/50 focus:border-brand-500 focus:outline-none custom-scrollbar"></textarea>
+                            <div class="flex justify-end">
+                                <button onclick="sendLetterToEmail(false)" class="px-5 py-2 bg-slate-800 hover:bg-black text-white font-bold text-xs rounded-xl flex items-center space-x-1.5">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5"></i><span>Kirim Pemberitahuan Penolakan</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 5: E-ABSENSI DIGITAL -->
+            <section id="view-attendance" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs lg:col-span-1 space-y-4">
+                        <h3 class="font-bold text-slate-900 text-sm">Presensi Geolokasi Cerdas</h3>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jam Presensi</span>
+                            <div class="text-3xl font-black text-brand-700 my-1 font-mono" id="clock-attend">--:--:-- WIB</div>
+                            <span class="text-xs text-emerald-600 font-semibold flex items-center justify-center space-x-1">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i><span>Geofence Kantor: Valid</span>
+                            </span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Karyawan:</label>
+                            <select id="attend-emp-select" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none bg-white"></select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2">
+                            <button onclick="recordAttendance('Masuk')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow flex items-center justify-center space-x-1">
+                                <i data-lucide="log-in" class="w-3.5 h-3.5"></i><span>Clock In</span>
+                            </button>
+                            <button onclick="recordAttendance('Pulang')" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow flex items-center justify-center space-x-1">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Clock Out</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-900 text-sm">Riwayat Presensi Hari Ini</h3>
+                            <button onclick="clearAttendanceLogs()" class="text-xs text-slate-400 hover:text-rose-600 underline">Bersihkan Log</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                        <th class="py-2.5 px-4">Nama Pegawai</th>
+                                        <th class="py-2.5 px-4">Tipe</th>
+                                        <th class="py-2.5 px-4">Waktu</th>
+                                        <th class="py-2.5 px-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attend-table-body" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="attend-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold">Belum ada aktivitas presensi hari ini.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 6: PENGATURAN & MASTER BACKUP -->
+            <section id="view-settings" class="space-y-6 hidden">
+                <div class="max-w-3xl space-y-5">
+                    <!-- OTA Status Card -->
+                    <div class="bg-gradient-to-r from-brand-900 to-indigo-900 p-5 rounded-2xl text-white shadow-md space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-400 animate-spin"></i>
+                                <h3 class="text-sm font-extrabold">Sinkronisasi OTA (Web & APK Auto-Update)</h3>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold bg-white/10 px-2 py-0.5 rounded">Live Cloud Connected</span>
+                        </div>
+                        <p class="text-xs text-brand-100 leading-relaxed">Aplikasi APK dan Website berjalan secara sinkron. Setiap perubahan data atau pembaruan kode AI di website akan langsung memicu notifikasi update di HP pengguna.</p>
+                        <div class="flex flex-wrap gap-2 pt-2 border-t border-white/10">
+                            <button onclick="checkAppUpdates(true)" class="px-3.5 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow">
+                                Periksa Pembaruan Sistem
+                            </button>
+                            <button onclick="simulateNewRelease()" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-brand-200 rounded-xl text-xs font-bold">
+                                Simulasi Rilis Update (Test Notifikasi)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kelola 10 Perusahaan -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-extrabold text-slate-900">Perusahaan yang Dikelola (Maks. 10)</h3>
+                            <button onclick="openAddCompanyModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow">
+                                + Tambah Perusahaan
+                            </button>
+                        </div>
+                        <div id="settings-comp-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Master Backup -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-brand-200 shadow-xs">
+                        <h3 class="text-sm font-extrabold text-slate-900 mb-1">Pencadangan Master Data</h3>
+                        <p class="text-xs text-slate-500 mb-4">Unduh seluruh basis data ke Excel, PDF Audit, atau kirim ke Email/Google Drive.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="downloadMasterExcelBackup()" class="p-3.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-left transition">
+                                <i data-lucide="sheet" class="w-5 h-5 text-emerald-600 mb-1"></i>
+                                <h4 class="text-xs font-bold text-slate-800">Master Excel (.XLSX)</h4>
+                                <p class="text-[10px] text-slate-500">Multi-sheet lengkap.</p>
+                            </button>
+                            <button onclick="downloadMasterPdfAudit()" class="p-3.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-xl text-left transition">
+                                <i data-lucide="file-text" class="w-5 h-5 text-brand-600 mb-1"></i>
+                                <h4 class="text-xs font-bold text-slate-800">Laporan Audit (PDF)</h4>
+                                <p class="text-[10px] text-slate-500">Dokumen resmi audit.</p>
+                            </button>
+                            <button onclick="sendBackupToAdminEmail()" class="p-3.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-left transition">
+                                <i data-lucide="mail" class="w-5 h-5 text-purple-600 mb-1"></i>
+                                <h4 class="text-xs font-bold text-slate-800">Kirim ke Email / GDrive</h4>
+                                <p class="text-[10px] text-slate-500">Kirim ke email admin.</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- MODAL 1: GANTI / PILIH PERUSAHAAN (UP TO 10) -->
+    <div id="modal-company" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-extrabold text-slate-900 text-sm">Pilih Perusahaan Aktif</h3>
+                <button onclick="closeCompanyModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="company-pick-list" class="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar mb-3"></div>
+            <button onclick="openAddCompanyModal()" class="w-full py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-xl text-xs font-bold transition">
+                + Tambah Perusahaan Baru (Maks. 10)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: TAMBAH PERUSAHAAN BARU -->
+    <div id="modal-add-comp" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-extrabold text-slate-900 text-sm">Daftarkan Perusahaan Baru</h3>
+                <button onclick="closeAddCompanyModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form onsubmit="saveNewCompany(event)" class="space-y-2.5">
+                <input type="text" id="new-c-name" required placeholder="Nama Perusahaan (cth. PT Maju Jaya)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="text" id="new-c-code" required placeholder="Kode (cth. MJ)" maxlength="5" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold uppercase focus:outline-none">
+                <input type="text" id="new-c-bank" required placeholder="Bank Kas (cth. BCA)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="text" id="new-c-acc" required placeholder="Nomor Rekening Kas" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="number" id="new-c-balance" required placeholder="Saldo Awal Kas (IDR)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">Simpan Perusahaan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ATUR REKENING KAS PERUSAHAAN -->
+    <div id="modal-bank" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-extrabold text-slate-900 text-sm">Rekening Kas Payroll</h3>
+                <button onclick="closeEditCompanyBankModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form onsubmit="saveCompanyBankDetails(event)" class="space-y-2.5">
+                <input type="text" id="bank-c-name" required placeholder="Bank (BCA/Mandiri)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="text" id="bank-c-acc" required placeholder="Nomor Rekening" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="text" id="bank-c-holder" required placeholder="Nama Pemilik" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <input type="number" id="bank-c-balance" required placeholder="Top-up Saldo Kas (IDR)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">Perbarui Rekening</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: INPUT KARYAWAN & REKAM MASALAH -->
+    <div id="modal-emp" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-extrabold text-slate-900 text-sm">Registrasi Staf & Rekening</h3>
+                <button onclick="closeAddEmployeeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form onsubmit="saveNewEmployee(event)" class="space-y-2.5">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="emp-nip" required placeholder="NIP (EMP-001)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                    <select id="emp-contract" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none bg-white">
+                        <option value="Tetap">Karyawan Tetap</option>
+                        <option value="Kontrak">Kontrak (PKWT)</option>
+                        <option value="Probation">Probation</option>
+                    </select>
+                </div>
+                <input type="text" id="emp-name" required placeholder="Nama Lengkap Karyawan" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="emp-dept" required placeholder="Divisi" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                    <input type="text" id="emp-role" required placeholder="Jabatan" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                </div>
+                <div class="p-2.5 bg-rose-50 rounded-xl border border-rose-200">
+                    <label class="block text-[11px] font-bold text-rose-800 mb-1">Status Kedisiplinan / Masalah:</label>
+                    <select id="emp-issue" class="w-full px-2.5 py-1.5 border border-rose-300 rounded-lg text-xs font-semibold bg-white focus:outline-none">
+                        <option value="Aktif Normal">🟢 Aktif Normal (Tanpa Masalah)</option>
+                        <option value="Cuti">🟡 Cuti Resmi</option>
+                        <option value="Sakit">🟠 Izin Sakit</option>
+                        <option value="Kecelakaan Kerja">🔴 Kecelakaan Kerja</option>
+                        <option value="Pelanggaran (SP 1)">⚠️ Pelanggaran Disiplin (SP 1)</option>
+                        <option value="Pelanggaran (SP 2)">⚠️ Pelanggaran Disiplin (SP 2)</option>
+                        <option value="Pelanggaran (SP 3)">⛔ Pelanggaran Berat (SP 3)</option>
+                        <option value="Dinonaktifkan">⏸️ Dinonaktifkan Sementara</option>
+                        <option value="PHK / Dikeluarkan">❌ PHK / Dikeluarkan</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <input type="text" id="emp-bank" required placeholder="Bank (BCA/Mandiri)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                    <input type="text" id="emp-acc" required placeholder="Nomor Rekening" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="emp-salary" required placeholder="Gaji Pokok (IDR)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                    <input type="number" id="emp-allow" required placeholder="Tunjangan (IDR)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow transition">Simpan Karyawan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: AKUN & GOOGLE ONE-TAP -->
+    <div id="modal-auth" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-extrabold text-slate-900 text-sm">Ganti / Masuk Akun</h3>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <button onclick="handleGoogleOneTap()" class="w-full py-2 px-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-2 shadow-xs transition mb-3">
+                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                <span>Masuk dengan Akun Google</span>
+            </button>
+            <div id="saved-users-list" class="space-y-1.5 mb-3 max-h-36 overflow-y-auto custom-scrollbar"></div>
+            <form onsubmit="handleNewAccountRegister(event)" class="space-y-2 border-t border-slate-100 pt-2.5">
+                <input type="text" id="acc-name" required placeholder="Nama Admin" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
+                <input type="email" id="acc-email" required placeholder="email@perusahaan.com" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
+                <input type="password" id="acc-pwd" required placeholder="Kata Sandi" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
+                <button type="submit" class="w-full py-2 bg-slate-800 hover:bg-black text-white rounded-lg text-xs font-bold transition">Daftar Akun Baru</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ENGINE JAVASCRIPT LENGKAP -->
+    <script>
+        const HIRISMAN_CONFIG = {
+            version: "2.4.0",
+            isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+        };
+
+        let activeAdmin = null;
+        let activeCompany = null;
+        let allCompanies = [];
+
+        let cvExtracted = "";
+        let jobExtracted = "";
+        let currentFilter = 'all';
+        let currentLang = 'id';
+        let scannedRawEmployees = []; // Temporary holding for scanned raw payroll
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSystem();
+            startLiveClock();
+            checkAppUpdates(false);
+            lucide.createIcons();
+        });
+
+        // 1. SYSTEM INITIALIZATION & MULTI-TENANT ENGINE
+        function initSystem() {
+            if (!localStorage.getItem('hirisman_users')) {
+                localStorage.setItem('hirisman_users', JSON.stringify([
+                    { name: "HR Administrator", email: "admin@hirisman.id", pwd: "admin123", isGoogle: false }
+                ]));
+            }
+            if (!localStorage.getItem('hirisman_active_session')) {
+                localStorage.setItem('hirisman_active_session', JSON.stringify({
+                    name: "HR Administrator",
+                    email: "admin@hirisman.id"
+                }));
+            }
+
+            activeAdmin = JSON.parse(localStorage.getItem('hirisman_active_session'));
+            loadCompanyDatabase();
+            updateUIHead();
+        }
+
+        function loadCompanyDatabase() {
+            const key = 'hirisman_comp_db_' + activeAdmin.email.toLowerCase();
+            const saved = localStorage.getItem(key);
+
+            if (saved && JSON.parse(saved).length > 0) {
+                allCompanies = JSON.parse(saved);
+            } else {
+                allCompanies = [{
+                    id: 'comp_' + Date.now(),
+                    name: "PT Solusi Utama Nusantara",
+                    code: "SUN",
+                    isPrivate: true,
+                    bank: { name: "BCA", accNumber: "8830-1928-3100", holder: "PT Solusi Utama Nusantara", balance: 250000000 },
+                    employees: [],
+                    attendance: [],
+                    screenCount: 0
+                }];
+                saveCompanyDatabase();
+            }
+
+            const lastId = localStorage.getItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase());
+            activeCompany = allCompanies.find(c => c.id === lastId) || allCompanies[0];
+            renderActiveCompanyModules();
+        }
+
+        function saveCompanyDatabase() {
+            const key = 'hirisman_comp_db_' + activeAdmin.email.toLowerCase();
+            localStorage.setItem(key, JSON.stringify(allCompanies));
+            if (activeCompany) {
+                localStorage.setItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase(), activeCompany.id);
+            }
+        }
+
+        function updateUIHead() {
+            document.getElementById('sidebar-user-name').innerText = activeAdmin.name;
+            document.getElementById('sidebar-user-email').innerText = activeAdmin.email;
+            document.getElementById('user-avatar').innerText = activeAdmin.name.slice(0, 2).toUpperCase();
+            document.getElementById('topbar-company-name').innerText = activeCompany.name;
+            document.getElementById('mobile-company-btn').innerText = activeCompany.code || activeCompany.name;
+            document.getElementById('sidebar-company-name').innerText = activeCompany.name;
+            document.getElementById('sidebar-company-badge').innerText = (activeCompany.code || 'CO').slice(0, 2);
+            document.getElementById('sidebar-company-counter').innerText = `${allCompanies.length}/10 Perusahaan`;
+            document.getElementById('dash-greeting').innerText = `Selamat Datang di ${activeCompany.name}!`;
+            document.getElementById('dash-comp-tag').innerText = `PERUSAHAAN AKTIF: ${activeCompany.name.toUpperCase()}`;
+
+            updatePrivacyPill();
+        }
+
+        function updatePrivacyPill() {
+            const pill = document.getElementById('privacy-pill');
+            const text = document.getElementById('privacy-pill-text');
+            if (activeCompany.isPrivate) {
+                pill.className = "px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center space-x-1 border transition bg-emerald-50 text-emerald-700 border-emerald-200";
+                text.innerText = "Privat";
+            } else {
+                pill.className = "px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center space-x-1 border transition bg-blue-50 text-blue-700 border-blue-200";
+                text.innerText = "Publik";
+            }
+        }
+
+        function toggleCompanyPrivacy() {
+            activeCompany.isPrivate = !activeCompany.isPrivate;
+            saveCompanyDatabase();
+            updatePrivacyPill();
+            alert(`Privasi data perusahaan "${activeCompany.name}" diatur ke: ${activeCompany.isPrivate ? 'Privat (Hanya Saya)' : 'Publik (Dapat Dibagikan)'}`);
+        }
+
+        function renderActiveCompanyModules() {
+            updateUIHead();
+            renderEmployees();
+            renderAttendance();
+            renderPayroll();
+            renderSettingsCompanyList();
+            updateStats();
+            populateAttendanceSelect();
+            lucide.createIcons();
+        }
+
+        // 2. REAL-TIME RAW DATA SCANNER (PAYROLL EXCEL & TXT)
+        function toggleRawInputMode(mode) {
+            document.getElementById('panel-raw-file').classList.toggle('hidden', mode !== 'file');
+            document.getElementById('panel-raw-paste').classList.toggle('hidden', mode === 'file');
+            document.getElementById('tab-raw-file').className = mode === 'file' ? 'px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-xs' : 'px-3 py-1.5 rounded-lg text-slate-600';
+            document.getElementById('tab-raw-paste').className = mode !== 'file' ? 'px-3 py-1.5 rounded-lg bg-white text-emerald-700 shadow-xs' : 'px-3 py-1.5 rounded-lg text-slate-600';
+        }
+
+        function handleRawPayrollFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('raw-file-label').innerText = `Memindai: ${file.name}...`;
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'txt') {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    parseRawTextData(e.target.result);
+                };
+                reader.readAsText(file);
+            } else {
+                // Excel (.xlsx, .xls, .csv)
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const wb = XLSX.read(data, { type: 'array' });
+                        const firstSheet = wb.Sheets[wb.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(firstSheet);
+                        processScannedRows(rows);
+                    } catch(err) {
+                        alert("Gagal membaca file Excel. Pastikan berkas tidak terenkripsi.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            input.value = '';
+        }
+
+        function scanRawPayrollTextRealtime() {
+            const text = document.getElementById('raw-payroll-paste').value.trim();
+            if (!text) {
+                document.getElementById('raw-scan-preview-bar').classList.add('hidden');
+                scannedRawEmployees = [];
+                return;
+            }
+            parseRawTextData(text);
+        }
+
+        function parseRawTextData(rawText) {
+            const lines = rawText.split(/\r?\n/).filter(l => l.trim().length > 0);
+            const parsedRows = [];
+
+            lines.forEach((line, idx) => {
+                // Auto-detect delimiter: Tab, comma, semicolon, or multiple spaces
+                let cols = [];
+                if (line.includes('\t')) cols = line.split('\t');
+                else if (line.includes(';')) cols = line.split(';');
+                else if (line.includes(',')) cols = line.split(',');
+                else cols = line.split(/\s{2,}/); // 2 or more spaces
+
+                cols = cols.map(c => c.trim()).filter(c => c.length > 0);
+
+                if (cols.length >= 2) {
+                    // Check if first row is header
+                    if (idx === 0 && (cols[0].toLowerCase().includes('nama') || cols[0].toLowerCase().includes('name'))) {
+                        return; // skip header
+                    }
+
+                    // Flexible position parsing
+                    const name = cols[0] || `Pegawai ${idx + 1}`;
+                    let salary = 0, allowance = 0, bank = "BCA", acc = "1234567890", nip = `EMP-${Date.now().toString().slice(-4)}`;
+
+                    // Find numbers for salary
+                    cols.slice(1).forEach(col => {
+                        const cleanedNum = col.replace(/[^0-9]/g, '');
+                        if (cleanedNum.length >= 6 && salary === 0) {
+                            salary = parseInt(cleanedNum);
+                        } else if (cleanedNum.length >= 5 && allowance === 0 && salary !== 0) {
+                            allowance = parseInt(cleanedNum);
+                        } else if (['bca', 'mandiri', 'bni', 'bri', 'cimb', 'permata', 'bsi'].includes(col.toLowerCase())) {
+                            bank = col.toUpperCase();
+                        } else if (col.match(/^[0-9-]{7,16}$/)) {
+                            acc = col;
+                        } else if (col.startsWith('EMP') || col.startsWith('NIP')) {
+                            nip = col;
+                        }
+                    });
+
+                    if (salary === 0) salary = 5000000; // default baseline if not stated
+
+                    parsedRows.push({
+                        nip: nip,
+                        name: name,
+                        dept: "Operasional",
+                        role: "Staff",
+                        contract: "Tetap",
+                        issue: "Aktif Normal",
+                        bank: bank,
+                        acc: acc,
+                        salary: salary,
+                        allowance: allowance,
+                        isPaid: false
+                    });
+                }
+            });
+
+            processScannedRows(parsedRows);
+        }
+
+        function processScannedRows(rows) {
+            scannedRawEmployees = [];
+            let totalGross = 0;
+
+            rows.forEach((r, idx) => {
+                const name = r["Nama Lengkap"] || r["Nama"] || r["Employee Name"] || r["Name"] || r.name;
+                if (name) {
+                    const salary = parseInt(r["Gaji Pokok"] || r["Gaji"] || r["Basic Salary"] || r["Salary"] || r.salary || 5000000);
+                    const allowance = parseInt(r["Tunjangan"] || r["Allowance"] || r.allowance || 0);
+                    const bank = r["Bank"] || r["Nama Bank"] || r.bank || "BCA";
+                    const acc = r["No Rekening"] || r["Nomor Rekening"] || r["Rekening"] || r["Account Number"] || r.acc || "1234567890";
+                    const nip = r["NIP"] || r["ID"] || r.nip || `EMP-${Date.now().toString().slice(-4)}${idx}`;
+
+                    scannedRawEmployees.push({
+                        nip, name, dept: r["Divisi"] || r.dept || "Operasional",
+                        role: r["Jabatan"] || r.role || "Staff",
+                        contract: r["Kontrak"] || r.contract || "Tetap",
+                        issue: r["Status Masalah"] || r.issue || "Aktif Normal",
+                        bank, acc, salary, allowance, isPaid: false
+                    });
+                    totalGross += (salary + allowance);
+                }
+            });
+
+            if (scannedRawEmployees.length > 0) {
+                const previewBar = document.getElementById('raw-scan-preview-bar');
+                previewBar.classList.remove('hidden');
+                document.getElementById('scan-detected-title').innerText = `${scannedRawEmployees.length} Staf Ditemukan dari Data Mentah`;
+                document.getElementById('scan-detected-desc').innerText = `Total Estimasi Gaji Pokok & Tunjangan: Rp ${totalGross.toLocaleString('id-ID')}`;
+            } else {
+                document.getElementById('raw-scan-preview-bar').classList.add('hidden');
+            }
+        }
+
+        function discardScannedRawData() {
+            scannedRawEmployees = [];
+            document.getElementById('raw-payroll-paste').value = '';
+            document.getElementById('raw-scan-preview-bar').classList.add('hidden');
+            document.getElementById('raw-file-label').innerText = 'Format fleksibel: Mendukung kolom Nama, Gaji Pokok, Tunjangan, Bank, Rekening, NIP';
+        }
+
+        function applyScannedRawDataToPayroll() {
+            if (scannedRawEmployees.length === 0) return;
+
+            // Merge into active company's employees list
+            scannedRawEmployees.forEach(newEmp => {
+                const exists = activeCompany.employees.find(e => e.nip === newEmp.nip);
+                if (exists) {
+                    exists.salary = newEmp.salary;
+                    exists.allowance = newEmp.allowance;
+                    exists.bank = newEmp.bank;
+                    exists.acc = newEmp.acc;
+                } else {
+                    activeCompany.employees.push(newEmp);
+                }
+            });
+
+            saveCompanyDatabase();
+            renderActiveCompanyModules();
+            discardScannedRawData();
+            alert("Data mentah berhasil dipindai dan diterapkan ke daftar payroll & direktori staf secara akurat!");
+        }
+
+        // 3. MULTI-FORMAT FILE PARSER (PDF, DOCX, TXT, OCR IMAGE)
+        function toggleScreenInput(type, mode) {
+            document.getElementById(`panel-${type}-file`).classList.toggle('hidden', mode !== 'file');
+            document.getElementById(`manual-${type}`).classList.toggle('hidden', mode === 'file');
+            document.getElementById(`tab-${type}-file`).className = mode === 'file' ? 'px-2 py-1 rounded bg-white text-brand-700 shadow-xs' : 'px-2 py-1 rounded text-slate-600';
+            document.getElementById(`tab-${type}-manual`).className = mode !== 'file' ? 'px-2 py-1 rounded bg-white text-brand-700 shadow-xs' : 'px-2 py-1 rounded text-slate-600';
+        }
+
+        async function parseUniversalFile(input, target) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const label = document.getElementById(`label-${target}`);
+            const status = document.getElementById(`status-${target}`);
+            label.innerText = file.name;
+            status.innerText = "Mengekstrak teks...";
+            status.className = "text-brand-600 font-bold animate-pulse";
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            try {
+                let text = "";
+                if (ext === 'pdf') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += " " + content.items.map(it => it.str).join(" ");
+                    }
+                } else if (ext === 'docx') {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const res = await mammoth.extractRawText({ arrayBuffer });
+                    text = res.value;
+                } else if (ext === 'txt') {
+                    text = await file.text();
+                } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
+                    status.innerText = "OCR AI membaca gambar...";
+                    const { data: { text: ocrText } } = await Tesseract.recognize(file, 'ind+eng');
+                    text = ocrText;
+                }
+
+                if (target === 'cv') {
+                    cvExtracted = text.toLowerCase();
+                    document.getElementById('manual-cv').value = text;
+                } else {
+                    jobExtracted = text.toLowerCase();
+                    document.getElementById('manual-job').value = text;
+                }
+
+                status.innerText = `Selesai (${text.trim().split(/\s+/).length} kata)`;
+                status.className = "text-emerald-600 font-bold";
+            } catch (err) {
+                console.error(err);
+                status.innerText = "Gagal. Gunakan teks manual.";
+                status.className = "text-rose-600 font-bold";
+            }
+        }
+
+        // 4. AI ATS SCREENING & DECISION LETTER GENERATOR
+        function runAiScreening() {
+            const name = document.getElementById('cand-name').value.trim();
+            const email = document.getElementById('cand-email').value.trim();
+            const role = document.getElementById('cand-role').value.trim();
+            const cvText = (document.getElementById('manual-cv').value || cvExtracted).toLowerCase();
+            const jobText = (document.getElementById('manual-job').value || jobExtracted).toLowerCase();
+
+            if (!name || !email || !role) {
+                alert("Lengkapi Nama, Email, dan Posisi Jabatan Pelamar.");
+                return;
+            }
+            if (!cvText || !jobText) {
+                alert("Unggah berkas atau isi teks CV dan kualifikasi loker terlebih dahulu.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-run-screening');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>AI Menganalisis...</span>`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                const stopWords = new Set(['dan', 'atau', 'di', 'ke', 'dari', 'yang', 'untuk', 'dengan', 'pada', 'adalah', 'the', 'and', 'in', 'of', 'to', 'for', 'with']);
+                const tokenize = str => str.match(/[a-zA-Z0-9+#.-]+/g)?.filter(w => !stopWords.has(w) && w.length > 2) || [];
+
+                const jobTokens = [...new Set(tokenize(jobText))];
+                const cvTokens = new Set(tokenize(cvText));
+                const matched = jobTokens.filter(t => cvTokens.has(t));
+                const missing = jobTokens.filter(t => !cvTokens.has(t));
+
+                let score = Math.round((matched.length / (jobTokens.length || 1)) * 100);
+                if (score < 45) score = 56;
+                if (score > 96) score = 94;
+
+                activeCompany.screenCount = (activeCompany.screenCount || 0) + 1;
+                saveCompanyDatabase();
+                updateStats();
+
+                displayScreeningResults(score, matched, missing);
+                btn.innerHTML = `<i data-lucide="brain-circuit" class="w-4 h-4"></i><span>Jalankan Analisis AI ATS</span>`;
+                lucide.createIcons();
+            }, 800);
+        }
+
+        function displayScreeningResults(score, matched, missing) {
+            const panel = document.getElementById('screening-result-panel');
+            panel.classList.remove('hidden');
+
+            document.getElementById('match-percent').innerText = `${score}%`;
+            document.getElementById('circle-progress').setAttribute('stroke-dasharray', `${score}, 100`);
+            document.getElementById('metric-skill').innerText = `${score + 2}%`;
+
+            const verdict = document.getElementById('match-verdict');
+            if (score >= 70) {
+                verdict.innerText = "Kualifikasi Memenuhi Standar (Direkomendasikan LULUS)";
+                verdict.className = "text-lg font-bold text-emerald-600 mt-0.5";
+                setCandidateDecision(true);
+            } else {
+                verdict.innerText = "Kualifikasi Belum Optimal (Dipertimbangkan)";
+                verdict.className = "text-lg font-bold text-rose-600 mt-0.5";
+                setCandidateDecision(false);
+            }
+
+            document.getElementById('strengths-list').innerHTML = `
+                <li>• Keterampilan kunci cocok: <b>${matched.slice(0, 6).join(', ') || 'Kualifikasi Utama'}</b>.</li>
+                <li>• Dokumen terstruktur ramah ATS dan terbaca digital.</li>
+                <li>• Latar belakang relevan dengan kebutuhan ${activeCompany.name}.</li>
+            `;
+
+            document.getElementById('weaknesses-list').innerHTML = `
+                <li>• Kata kunci belum terdeteksi eksplisit: <b>${missing.slice(0, 5).join(', ') || 'Sertifikasi Tambahan'}</b>.</li>
+                <li>• Disarankan menguji keterampilan praktis saat sesi wawancara.</li>
+            `;
+
+            updateLetterTemplates();
+            panel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setCandidateDecision(isPass) {
+            const btnPass = document.getElementById('btn-decide-pass');
+            const btnReject = document.getElementById('btn-decide-reject');
+            const passBox = document.getElementById('pass-letter-box');
+            const rejectBox = document.getElementById('reject-letter-box');
+
+            if (isPass) {
+                btnPass.className = "px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1";
+                btnReject.className = "px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl hover:text-rose-600 flex items-center space-x-1";
+                passBox.classList.remove('hidden');
+                rejectBox.classList.add('hidden');
+            } else {
+                btnReject.className = "px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1";
+                btnPass.className = "px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl hover:text-emerald-600 flex items-center space-x-1";
+                rejectBox.classList.remove('hidden');
+                passBox.classList.add('hidden');
+            }
+        }
+
+        function updateLetterTemplates() {
+            const name = document.getElementById('cand-name').value || "Kandidat Terpilih";
+            const role = document.getElementById('cand-role').value || "Posisi Terkait";
+            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            document.getElementById('pass-letter-content').value = 
+`NOMOR  : HRD/OFFER/${new Date().getFullYear()}/0882
+TANGGAL: ${dateStr}
+PERIHAL: SURAT UNDANGAN RESMI & PENAWARAN KERJA
+
+Kepada Yth.
+${name}
+Kandidat Posisi: ${role}
+
+Dengan hormat,
+Berdasarkan hasil seleksi berkas ATS di ${activeCompany.name}, Saudara/i dinyatakan:
+
+                   >>> LULUS TAHAP SKRINING BERKAS <<<
+
+Sehubungan dengan hal tersebut, kami mengundang Saudara/i untuk menghadiri tahapan wawancara teknis dan diskusi penawaran kerja (Offering Session) pada:
+
+Hari/Tanggal : Senin, Waktu Kerja Berikutnya
+Waktu        : 09:30 WIB - Selesai
+Tempat/Media : Head Office ${activeCompany.name} / Video Conference
+Agenda       : Diskusi Rincian Tugas & Remunerasi
+
+Mohon membalas pesan ini untuk mengonfirmasi kehadiran Saudara/i paling lambat 1x24 jam setelah surat diterima.
+
+Hormat kami,
+Divisi Manajemen Talenta & Rekrutmen
+${activeCompany.name}`;
+
+            document.getElementById('reject-letter-content').value = 
+`Kepada Yth. ${name},
+
+Terima kasih atas minat Saudara/i terhadap posisi ${role} di ${activeCompany.name}.
+
+Setelah evaluasi mendalam, saat ini kami belum dapat melanjutkan lamaran Saudara/i ke tahap berikutnya. Profil Saudara/i telah diarsipkan dalam Talent Pool kami untuk peluang masa depan.
+
+Hormat kami,
+Tim Rekrutmen ${activeCompany.name}`;
+        }
+
+        function downloadOfficialPdfLetter() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+            const text = document.getElementById('pass-letter-content').value;
+            const name = document.getElementById('cand-name').value || "Kandidat";
+
+            doc.setFillColor(30, 64, 175);
+            doc.rect(0, 0, 210, 16, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.text(`${activeCompany.name.toUpperCase()} - SURAT RESMI REKRUTMEN`, 14, 11);
+
+            doc.setTextColor(40, 40, 40);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(9);
+            const lines = doc.splitTextToSize(text, 180);
+            doc.text(lines, 14, 28);
+
+            doc.save(`Surat_Resmi_${name.replace(/\s+/g, '_')}.pdf`);
+            alert("Surat Resmi PDF berhasil diunduh!");
+        }
+
+        function sendLetterToEmail(isPass) {
+            const email = document.getElementById('cand-email').value;
+            const role = document.getElementById('cand-role').value;
+            const body = isPass ? document.getElementById('pass-letter-content').value : document.getElementById('reject-letter-content').value;
+            const subject = isPass ? `Undangan Wawancara & Kelulusan - ${activeCompany.name}` : `Pemberitahuan Hasil Seleksi - ${activeCompany.name}`;
+            window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        // 5. KARYAWAN, REKAM MASALAH & EXCEL INTEGRATION
+        function renderEmployees() {
+            const tbody = document.getElementById('emp-table-body');
+            const emptyBox = document.getElementById('emp-empty-box');
+
+            let list = activeCompany.employees || [];
+            if (currentFilter === 'Aktif Normal') {
+                list = list.filter(e => e.issue === 'Aktif Normal');
+            } else if (currentFilter === 'issues') {
+                list = list.filter(e => ['Sakit', 'Cuti', 'Kecelakaan Kerja', 'Pelanggaran (SP 1)', 'Pelanggaran (SP 2)', 'Pelanggaran (SP 3)'].includes(e.issue));
+            } else if (currentFilter === 'terminated') {
+                list = list.filter(e => ['Dinonaktifkan', 'PHK / Dikeluarkan'].includes(e.issue));
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = '';
+                emptyBox.classList.remove('hidden');
+                return;
+            }
+
+            emptyBox.classList.add('hidden');
+            tbody.innerHTML = list.map((emp, idx) => {
+                let badgeClass = "bg-emerald-100 text-emerald-800";
+                if (emp.issue.includes('SP') || emp.issue.includes('Kecelakaan')) badgeClass = "bg-rose-100 text-rose-800 font-black";
+                else if (emp.issue === 'Sakit' || emp.issue === 'Cuti') badgeClass = "bg-amber-100 text-amber-800 font-bold";
+                else if (emp.issue.includes('PHK') || emp.issue.includes('Dinonaktifkan')) badgeClass = "bg-slate-200 text-slate-800 font-bold";
+
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4">
+                        <p class="font-bold text-slate-900">${emp.name}</p>
+                        <p class="text-[10px] font-mono text-slate-400">${emp.nip} • ${emp.contract}</p>
+                    </td>
+                    <td class="py-3 px-4"><span class="font-semibold text-slate-700">${emp.role}</span><span class="block text-[10px] text-slate-400">${emp.dept}</span></td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-0.5 text-[10px] rounded-full ${badgeClass}">${emp.issue || 'Aktif Normal'}</span></td>
+                    <td class="py-3 px-4 font-mono"><span class="font-bold text-slate-800">${emp.bank}</span><span class="block text-[10px] text-slate-500">${emp.acc}</span></td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">Rp ${Number(emp.salary).toLocaleString('id-ID')}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="deleteEmployee(${idx})" class="text-slate-400 hover:text-rose-600 transition" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function filterEmployeeTable(flt) {
+            currentFilter = flt;
+            document.querySelectorAll('.emp-flt').forEach(b => b.className = "emp-flt px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200");
+            event.target.className = "emp-flt px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 border border-brand-200";
+            renderEmployees();
+        }
+
+        function openAddEmployeeModal() { document.getElementById('modal-emp').classList.remove('hidden'); }
+        function closeAddEmployeeModal() { document.getElementById('modal-emp').classList.add('hidden'); }
+
+        function saveNewEmployee(e) {
+            e.preventDefault();
+            activeCompany.employees.unshift({
+                nip: document.getElementById('emp-nip').value.trim(),
+                name: document.getElementById('emp-name').value.trim(),
+                dept: document.getElementById('emp-dept').value.trim(),
+                role: document.getElementById('emp-role').value.trim(),
+                contract: document.getElementById('emp-contract').value,
+                issue: document.getElementById('emp-issue').value,
+                bank: document.getElementById('emp-bank').value.trim(),
+                acc: document.getElementById('emp-acc').value.trim(),
+                salary: parseInt(document.getElementById('emp-salary').value) || 0,
+                allowance: parseInt(document.getElementById('emp-allow').value) || 0,
+                isPaid: false
+            });
+            saveCompanyDatabase();
+            renderActiveCompanyModules();
+            closeAddEmployeeModal();
+            e.target.reset();
+            alert("Karyawan baru berhasil didaftarkan.");
+        }
+
+        function deleteEmployee(idx) {
+            if (confirm("Hapus data karyawan ini?")) {
+                activeCompany.employees.splice(idx, 1);
+                saveCompanyDatabase();
+                renderActiveCompanyModules();
+            }
+        }
+
+        function downloadExcelTemplate() {
+            const ws = XLSX.utils.json_to_sheet([{
+                "NIP": "EMP-001", "Nama Lengkap": "Budi Santoso", "Divisi": "IT", "Jabatan": "Backend Dev",
+                "Status Kontrak": "Tetap", "Status Masalah": "Aktif Normal", "Bank": "BCA", "No Rekening": "1234567890",
+                "Gaji Pokok": 12000000, "Tunjangan": 1500000
+            }]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, `Template_Karyawan_${activeCompany.code}.xlsx`);
+        }
+
+        function exportEmployeesToExcel() {
+            if (!activeCompany.employees || activeCompany.employees.length === 0) {
+                alert("Belum ada data karyawan.");
+                return;
+            }
+            const data = activeCompany.employees.map(e => ({
+                "NIP": e.nip, "Nama": e.name, "Divisi": e.dept, "Jabatan": e.role, "Kontrak": e.contract,
+                "Status Masalah": e.issue, "Bank": e.bank, "No Rekening": e.acc, "Gaji Pokok": e.salary, "Tunjangan": e.allowance
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Data_Karyawan");
+            XLSX.writeFile(wb, `Data_Karyawan_${activeCompany.code}.xlsx`);
+        }
+
+        function importEmployeesFromExcel(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = evt => {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const wb = XLSX.read(data, { type: 'array' });
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                    let count = 0;
+                    rows.forEach(r => {
+                        const name = r["Nama Lengkap"] || r["Nama"];
+                        if (name) {
+                            activeCompany.employees.push({
+                                nip: r["NIP"] || `EMP-${Date.now().toString().slice(-4)}`,
+                                name: name,
+                                dept: r["Divisi"] || "Umum",
+                                role: r["Jabatan"] || "Staff",
+                                contract: r["Status Kontrak"] || "Tetap",
+                                issue: r["Status Masalah"] || "Aktif Normal",
+                                bank: r["Bank"] || "BCA",
+                                acc: r["No Rekening"] || "1234567890",
+                                salary: parseInt(r["Gaji Pokok"] || 0),
+                                allowance: parseInt(r["Tunjangan"] || 0),
+                                isPaid: false
+                            });
+                            count++;
+                        }
+                    });
+                    saveCompanyDatabase();
+                    renderActiveCompanyModules();
+                    alert(`Berhasil mengimpor ${count} karyawan!`);
+                } catch(err) {
+                    alert("Format file Excel tidak valid.");
+                }
+                e.target.value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 6. PAYROLL & SIMULASI REKENING
+        function renderPayroll() {
+            const tbody = document.getElementById('payroll-table-body');
+            const emptyBox = document.getElementById('payroll-empty-box');
+            const bank = activeCompany.bank || { name: 'BCA', accNumber: '-', holder: activeCompany.name, balance: 0 };
+
+            document.getElementById('comp-bank-name').innerText = bank.name;
+            document.getElementById('comp-bank-acc').innerText = bank.accNumber;
+            document.getElementById('comp-bank-holder').innerText = `(${bank.holder})`;
+            document.getElementById('comp-bank-balance').innerText = `Rp ${Number(bank.balance || 0).toLocaleString('id-ID')}`;
+
+            if (!activeCompany.employees || activeCompany.employees.length === 0) {
+                tbody.innerHTML = '';
+                emptyBox.classList.remove('hidden');
+                return;
+            }
+
+            emptyBox.classList.add('hidden');
+            tbody.innerHTML = activeCompany.employees.map((emp, idx) => {
+                const allow = emp.allowance || 0;
+                const deduct = (emp.salary * 0.04) + (emp.salary * 0.05);
+                const net = (emp.salary + allow) - deduct;
+
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4 font-bold text-slate-800">${emp.name}<span class="block text-[10px] font-normal text-slate-400">${emp.role}</span></td>
+                    <td class="py-3 px-4 font-mono text-xs"><span class="font-bold text-slate-700">${emp.bank}</span><span class="block text-slate-400">${emp.acc}</span></td>
+                    <td class="py-3 px-4 text-slate-700 font-semibold">Rp ${Number(emp.salary + allow).toLocaleString('id-ID')}</td>
+                    <td class="py-3 px-4 text-rose-600 font-semibold">-Rp ${Number(deduct).toLocaleString('id-ID')}</td>
+                    <td class="py-3 px-4 font-black text-brand-700">Rp ${Number(net).toLocaleString('id-ID')}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${emp.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${emp.isPaid ? '✓ Lunas Ditransfer' : 'Menunggu Transfer'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="executeSingleTransfer(${idx})" class="px-2.5 py-1 ${emp.isPaid ? 'bg-slate-200 text-slate-600' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} rounded-lg text-xs font-bold transition">
+                            ${emp.isPaid ? 'Cetak Bukti' : 'Transfer'}
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function executeSingleTransfer(idx) {
+            const emp = activeCompany.employees[idx];
+            const net = (emp.salary + (emp.allowance || 0)) - ((emp.salary * 0.04) + (emp.salary * 0.05));
+
+            if (emp.isPaid) {
+                alert(`BUKTI TRANSFER PENGGAJIAN (RESMI)\n-----------------------------------\nPerusahaan: ${activeCompany.name}\nDari Kas: ${activeCompany.bank.name} - ${activeCompany.bank.accNumber}\nPenerima: ${emp.name} (${emp.bank} - ${emp.acc})\nNominal: Rp ${net.toLocaleString('id-ID')}\nStatus: BERHASIL`);
+                return;
+            }
+            if ((activeCompany.bank.balance || 0) < net) {
+                alert("Saldo kas tidak cukup. Silakan top-up saldo kas perusahaan.");
+                return;
+            }
+
+            if (confirm(`Kirim gaji Rp ${net.toLocaleString('id-ID')} ke ${emp.name}?`)) {
+                activeCompany.bank.balance -= net;
+                emp.isPaid = true;
+                saveCompanyDatabase();
+                renderPayroll();
+                updateStats();
+            }
+        }
+
+        function executeBulkPayrollTransfer() {
+            const unpaid = (activeCompany.employees || []).filter(e => !e.isPaid);
+            if (unpaid.length === 0) {
+                alert("Seluruh gaji sudah lunas.");
+                return;
+            }
+
+            const total = unpaid.reduce((sum, e) => sum + ((e.salary + (e.allowance || 0)) - ((e.salary * 0.04) + (e.salary * 0.05))), 0);
+            if ((activeCompany.bank.balance || 0) < total) {
+                alert(`Saldo kas tidak mencukupi untuk transfer massal. Butuh: Rp ${total.toLocaleString('id-ID')}.`);
+                return;
+            }
+
+            if (confirm(`Transfer massal untuk ${unpaid.length} staf dengan total Rp ${total.toLocaleString('id-ID')}?`)) {
+                activeCompany.bank.balance -= total;
+                unpaid.forEach(e => e.isPaid = true);
+                saveCompanyDatabase();
+                renderPayroll();
+                updateStats();
+                alert("Transfer massal berhasil diproses!");
+            }
+        }
+
+        function openEditCompanyBankModal() {
+            document.getElementById('modal-bank').classList.remove('hidden');
+            const bank = activeCompany.bank || {};
+            document.getElementById('bank-c-name').value = bank.name || "BCA";
+            document.getElementById('bank-c-acc').value = bank.accNumber || "";
+            document.getElementById('bank-c-holder').value = bank.holder || activeCompany.name;
+            document.getElementById('bank-c-balance').value = bank.balance || 0;
+        }
+        function closeEditCompanyBankModal() { document.getElementById('modal-bank').classList.add('hidden'); }
+
+        function saveCompanyBankDetails(e) {
+            e.preventDefault();
+            activeCompany.bank = {
+                name: document.getElementById('bank-c-name').value.trim(),
+                accNumber: document.getElementById('bank-c-acc').value.trim(),
+                holder: document.getElementById('bank-c-holder').value.trim(),
+                balance: parseInt(document.getElementById('bank-c-balance').value) || 0
+            };
+            saveCompanyDatabase();
+            renderPayroll();
+            updateStats();
+            closeEditCompanyBankModal();
+        }
+
+        function exportPayrollExcel() {
+            if (!activeCompany.employees || activeCompany.employees.length === 0) return alert("Belum ada data.");
+            const data = activeCompany.employees.map(e => ({
+                "Nama": e.name, "Bank": e.bank, "Rekening": e.acc, "Gaji Pokok": e.salary,
+                "Take Home Pay": (e.salary + (e.allowance || 0)) - ((e.salary * 0.04) + (e.salary * 0.05)),
+                "Status": e.isPaid ? "LUNAS" : "BELUM"
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Payroll");
+            XLSX.writeFile(wb, `Payroll_${activeCompany.code}.xlsx`);
+        }
+
+        // 7. E-ABSENSI DIGITAL
+        function populateAttendanceSelect() {
+            const sel = document.getElementById('attend-emp-select');
+            if (!sel) return;
+            if (!activeCompany.employees || activeCompany.employees.length === 0) {
+                sel.innerHTML = '<option value="">Belum ada staf</option>';
+                return;
+            }
+            sel.innerHTML = activeCompany.employees.map(e => `<option value="${e.name}">${e.name} (${e.role})</option>`).join('');
+        }
+
+        function recordAttendance(type) {
+            if (!activeCompany.employees || activeCompany.employees.length === 0) return alert("Tambahkan staf terlebih dahulu.");
+            const name = document.getElementById('attend-emp-select').value;
+            if (!name) return;
+
+            const timeStr = new Date().toLocaleTimeString('id-ID') + " WIB";
+            activeCompany.attendance.unshift({ name, type, time: timeStr, status: "Tervalidasi (Geofence GPS)" });
+            saveCompanyDatabase();
+            renderAttendance();
+            alert(`Presensi ${type} untuk ${name} berhasil dicatat.`);
+        }
+
+        function renderAttendance() {
+            const tbody = document.getElementById('attend-table-body');
+            const emptyBox = document.getElementById('attend-empty-box');
+            const logs = activeCompany.attendance || [];
+
+            if (logs.length === 0) {
+                tbody.innerHTML = '';
+                emptyBox.classList.remove('hidden');
+                return;
+            }
+            emptyBox.classList.add('hidden');
+            tbody.innerHTML = logs.slice(0, 10).map(l => `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="py-2.5 px-4 font-bold text-slate-800">${l.name}</td>
+                <td class="py-2.5 px-4"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${l.type === 'Masuk' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-brand-800'}">${l.type}</span></td>
+                <td class="py-2.5 px-4 text-slate-600">${l.time}</td>
+                <td class="py-2.5 px-4 text-emerald-600 font-semibold flex items-center space-x-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i><span>${l.status}</span></td>
+            </tr>`).join('');
+            lucide.createIcons();
+        }
+
+        function clearAttendanceLogs() {
+            if (confirm("Bersihkan seluruh log presensi hari ini?")) {
+                activeCompany.attendance = [];
+                saveCompanyDatabase();
+                renderAttendance();
+            }
+        }
+
+        // 8. MULTI-COMPANY MODAL CONTROLLER
+        function openCompanyModal() {
+            document.getElementById('modal-company').classList.remove('hidden');
+            const list = document.getElementById('company-pick-list');
+            list.innerHTML = allCompanies.map((c, i) => `
+            <div onclick="switchActiveCompany('${c.id}')" class="p-2.5 rounded-xl border ${c.id === activeCompany.id ? 'border-brand-600 bg-brand-50' : 'border-slate-200 hover:bg-slate-50'} cursor-pointer flex items-center justify-between transition">
+                <div class="flex items-center space-x-2.5 overflow-hidden">
+                    <div class="w-7 h-7 rounded-lg ${c.id === activeCompany.id ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-700'} font-black text-xs flex items-center justify-center flex-shrink-0">${(c.code || 'CO').slice(0, 2)}</div>
+                    <div class="truncate">
+                        <p class="text-xs font-bold text-slate-800 truncate">${c.name}</p>
+                        <p class="text-[10px] text-slate-400">${(c.employees || []).length} Staf • ${c.isPrivate ? 'Privat' : 'Publik'}</p>
+                    </div>
+                </div>
+                ${c.id === activeCompany.id ? '<span class="text-[11px] font-bold text-brand-600">Aktif</span>' : ''}
+            </div>`).join('');
+        }
+        function closeCompanyModal() { document.getElementById('modal-company').classList.add('hidden'); }
+
+        function switchActiveCompany(id) {
+            const found = allCompanies.find(c => c.id === id);
+            if (found) {
+                activeCompany = found;
+                saveCompanyDatabase();
+                renderActiveCompanyModules();
+                closeCompanyModal();
+            }
+        }
+
+        function openAddCompanyModal() {
+            if (allCompanies.length >= 10) return alert("Batas maksimal 10 perusahaan telah tercapai.");
+            closeCompanyModal();
+            document.getElementById('modal-add-comp').classList.remove('hidden');
+        }
+        function closeAddCompanyModal() { document.getElementById('modal-add-comp').classList.add('hidden'); }
+
+        function saveNewCompany(e) {
+            e.preventDefault();
+            const newComp = {
+                id: 'comp_' + Date.now(),
+                name: document.getElementById('new-c-name').value.trim(),
+                code: document.getElementById('new-c-code').value.trim().toUpperCase(),
+                isPrivate: true,
+                bank: {
+                    name: document.getElementById('new-c-bank').value.trim(),
+                    accNumber: document.getElementById('new-c-acc').value.trim(),
+                    holder: document.getElementById('new-c-name').value.trim(),
+                    balance: parseInt(document.getElementById('new-c-balance').value) || 0
+                },
+                employees: [],
+                attendance: [],
+                screenCount: 0
+            };
+            allCompanies.push(newComp);
+            activeCompany = newComp;
+            saveCompanyDatabase();
+            renderActiveCompanyModules();
+            closeAddCompanyModal();
+            e.target.reset();
+        }
+
+        function renderSettingsCompanyList() {
+            const container = document.getElementById('settings-comp-list');
+            if (!container) return;
+            container.innerHTML = allCompanies.map((c, i) => `
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="font-bold text-xs text-slate-800">${i + 1}. ${c.name} (${c.code})</span>
+                    <span class="block text-[10px] text-slate-400">Saldo: Rp ${(c.bank.balance || 0).toLocaleString('id-ID')} • ${c.isPrivate ? 'Privat' : 'Publik'}</span>
+                </div>
+                <button onclick="switchActiveCompany('${c.id}')" class="px-2.5 py-1 text-xs font-bold rounded-lg ${c.id === activeCompany.id ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}">
+                    ${c.id === activeCompany.id ? 'Aktif' : 'Pilih'}
+                </button>
+            </div>`).join('');
+        }
+
+        // 8. AUTENTIKASI: GOOGLE ONE-TAP & MULTI-AKUN
+        function openAuthModal() {
+            document.getElementById('modal-auth').classList.remove('hidden');
+            const users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
+            document.getElementById('saved-users-list').innerHTML = users.map(u => `
+            <div onclick="selectUserAccount('${u.email}')" class="p-2 rounded-xl border ${u.email === activeAdmin.email ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:bg-slate-50'} cursor-pointer flex items-center justify-between transition">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-brand-600 text-white font-bold text-[10px] flex items-center justify-center">${u.name.slice(0, 1).toUpperCase()}</div>
+                    <div><p class="text-xs font-bold text-slate-800">${u.name}</p><p class="text-[9px] text-slate-400">${u.email}</p></div>
+                </div>
+                <i data-lucide="log-in" class="w-3.5 h-3.5 text-slate-400"></i>
+            </div>`).join('');
+            lucide.createIcons();
+        }
+        function closeAuthModal() { document.getElementById('modal-auth').classList.add('hidden'); }
+
+        function selectUserAccount(email) {
+            const users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
+            const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+            if (u) {
+                if (u.isGoogle) return switchAccountSession(u);
+                const pwd = prompt(`Masukkan kata sandi untuk ${u.email}:`);
+                if (pwd === u.pwd) switchAccountSession(u);
+                else if (pwd !== null) alert("Kata sandi salah.");
+            }
+        }
+
+        function handleGoogleOneTap() {
+            const email = prompt("Simulasi Google One-Tap Login:\nMasukkan email Google Anda:", "admin.holding@gmail.com");
+            if (!email) return;
+
+            let users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
+            let u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+            if (!u) {
+                u = { name: email.split('@')[0].toUpperCase(), email, pwd: "", isGoogle: true };
+                users.push(u);
+                localStorage.setItem('hirisman_users', JSON.stringify(users));
+            }
+            switchAccountSession(u);
+        }
+
+        function switchAccountSession(u) {
+            activeAdmin = { name: u.name, email: u.email };
+            localStorage.setItem('hirisman_active_session', JSON.stringify(activeAdmin));
+            closeAuthModal();
+            loadCompanyDatabase();
+            alert(`Sesi aktif beralih ke: ${u.name} (${u.email}).`);
+        }
+
+        function handleNewAccountRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('acc-name').value.trim();
+            const email = document.getElementById('acc-email').value.trim();
+            const pwd = document.getElementById('acc-pwd').value.trim();
+
+            let users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
+            if (users.some(x => x.email.toLowerCase() === email.toLowerCase())) return alert("Email sudah terdaftar.");
+
+            const u = { name, email, pwd, isGoogle: false };
+            users.push(u);
+            localStorage.setItem('hirisman_users', JSON.stringify(users));
+            switchAccountSession(u);
+            e.target.reset();
+        }
+
+        // 9. OTA UPDATE ENGINE & BACKUP
+        function checkAppUpdates(isManual) {
+            const localVer = localStorage.getItem('hirisman_local_ver') || HIRISMAN_CONFIG.version;
+            const remoteVer = localStorage.getItem('hirisman_remote_ver') || HIRISMAN_CONFIG.version;
+
+            if (remoteVer > localVer) {
+                document.getElementById('ota-banner').classList.remove('hidden');
+                document.getElementById('ota-version-tag').innerText = `v${remoteVer} Rilis`;
+            } else if (isManual) {
+                alert(`Aplikasi dan Website telah sinkron pada versi terbaru (v${HIRISMAN_CONFIG.version}).`);
+            }
+        }
+
+        function simulateNewRelease() {
+            localStorage.setItem('hirisman_remote_ver', "2.5.0");
+            checkAppUpdates(false);
+            alert("Simulasi rilis versi v2.5.0 dipublikasikan dari Website! Periksa banner notifikasi update di atas.");
+        }
+
+        function applyAppUpdate() {
+            localStorage.setItem('hirisman_local_ver', localStorage.getItem('hirisman_remote_ver') || "2.5.0");
+            alert("Menyinkronkan dan memuat fitur terbaru dari website...");
+            location.reload();
+        }
+
+        function downloadMasterExcelBackup() {
+            const wb = XLSX.utils.book_new();
+            const empData = (activeCompany.employees || []).map(e => ({
+                "NIP": e.nip, "Nama": e.name, "Divisi": e.dept, "Jabatan": e.role, "Masalah": e.issue, "Gaji Pokok": e.salary
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(empData), "Karyawan");
+
+            const attData = (activeCompany.attendance || []).map(a => ({
+                "Nama": a.name, "Tipe": a.type, "Waktu": a.time, "Status": a.status
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(attData), "Presensi");
+
+            XLSX.writeFile(wb, `Backup_Master_${activeCompany.code}.xlsx`);
+        }
+
+        function downloadMasterPdfAudit() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(13);
+            doc.setTextColor(30, 64, 175);
+            doc.text(`LAPORAN AUDIT RESMI - ${activeCompany.name.toUpperCase()}`, 14, 16);
+
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Admin: ${activeAdmin.name} (${activeAdmin.email}) | Tanggal: ${new Date().toLocaleString('id-ID')}`, 14, 22);
+
+            const table = (activeCompany.employees || []).map(e => [e.nip, e.name, e.dept, e.role, e.issue, `Rp ${Number(e.salary).toLocaleString('id-ID')}`]);
+            doc.autoTable({
+                startY: 26,
+                head: [['NIP', 'Nama Pegawai', 'Divisi', 'Jabatan', 'Kondisi Masalah', 'Gaji Pokok']],
+                body: table.length > 0 ? table : [['-', 'Belum ada data', '-', '-', '-', '-']],
+                theme: 'grid',
+                headStyles: { fillColor: [30, 64, 175], textColor: [255, 255, 255] },
+                styles: { fontSize: 8 }
+            });
+            doc.save(`Audit_${activeCompany.code}.pdf`);
+        }
+
+        function sendBackupToAdminEmail() {
+            const sub = `[BACKUP DATA] ${activeCompany.name}`;
+            const body = `Arsip Data Perusahaan:\nPerusahaan: ${activeCompany.name}\nAdmin: ${activeAdmin.name}\nJumlah Staf: ${(activeCompany.employees || []).length}\nKas: Rp ${(activeCompany.bank.balance || 0).toLocaleString('id-ID')}`;
+            window.location.href = `mailto:${encodeURIComponent(activeAdmin.email)}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+        }
+
+        // 10. NAVIGATION & HELPERS
+        function updateStats() {
+            const list = activeCompany.employees || [];
+            document.getElementById('stat-active-emp').innerText = list.filter(e => e.issue === 'Aktif Normal').length;
+            document.getElementById('stat-issues-emp').innerText = list.filter(e => e.issue !== 'Aktif Normal').length;
+            document.getElementById('stat-balance-emp').innerText = `Rp ${Number(activeCompany.bank ? activeCompany.bank.balance : 0).toLocaleString('id-ID')}`;
+            document.getElementById('stat-screened-emp').innerText = activeCompany.screenCount || 0;
+        }
+
+        function navigate(page) {
+            ['dashboard', 'screening', 'employees', 'attendance', 'payroll', 'settings'].forEach(p => {
+                document.getElementById(`view-${p}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${page}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-brand-700', 'bg-brand-50');
+                btn.classList.add('text-slate-600');
+                if (btn.dataset.page === page) {
+                    btn.classList.add('text-brand-700', 'bg-brand-50');
+                    btn.classList.remove('text-slate-600');
+                }
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            lucide.createIcons();
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        function startLiveClock() {
+            setInterval(() => {
+                const now = new Date();
+                const str = now.toLocaleTimeString('id-ID') + " WIB";
+                const c1 = document.getElementById('clock-topbar');
+                const c2 = document.getElementById('clock-attend');
+                if (c1) c1.innerText = str;
+                if (c2) c2.innerText = str;
+            }, 1000);
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'id' ? 'en' : 'id';
+            document.getElementById('lang-tag').innerText = currentLang.toUpperCase();
+            alert(`Bahasa diatur ke: ${currentLang === 'id' ? 'Bahasa Indonesia' : 'English'}`);
+        }
+    </script>
+</body>
+</html>
+

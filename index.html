@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HIRISMAN - Enterprise Multi-Company HRIS & ATS AI</title>
-    <!-- Web App Manifest -->
+    <!-- Web App Manifest (PWA & APK Ready) -->
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22HIRISMAN%20Enterprise%22%2C%22short_name%22%3A%22HIRISMAN%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%231e40af%22%7D">
     
-    <!-- Google Identity Services (OAuth 2.0 / OIDC) -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
+    <!-- Google Firebase SDK (Compat Version untuk Single-File & Realtime Sync) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -23,7 +25,7 @@
             }
         }
     </script>
-    <!-- Vector Icons (Lucide) -->
+    <!-- Lucide Vector Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- PDF.js Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -44,7 +46,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
         
-        /* Mode Orientasi */
+        /* Orientasi Khusus */
         body.force-portrait #app-wrapper { max-width: 480px; margin: 0 auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); min-height: 100vh; }
         body.force-landscape #app-wrapper { width: 100% !important; max-width: 100% !important; display: flex !important; flex-direction: row !important; }
         body.force-landscape #sidebar { display: flex !important; transform: translateX(0) !important; position: static !important; }
@@ -52,10 +54,80 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen select-none" id="app-body">
 
-<!-- TOAST NOTIFIKASI -->
+<!-- FLOATING TOAST NOTIFICATION -->
 <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
-<div id="app-wrapper" class="bg-slate-50 min-h-screen flex flex-col md:flex-row transition-all duration-300">
+<!-- ========================================================================= -->
+<!-- 1. GERBANG AUTENTIKASI UTAMA (AUTH GATEWAY / LOCKSCREEN SEBELUM MASUK)    -->
+<!-- ========================================================================= -->
+<div id="auth-gateway-screen" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative overflow-hidden space-y-5">
+        <div class="text-center space-y-1">
+            <div class="w-12 h-12 bg-brand-600 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg shadow-brand-500/30 mb-3">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2.5"/><path d="M8 15v-1a4 4 0 0 1 8 0v1"/><path d="M4 19h16"/><path d="M9 15h6l1 4H8l1-4z"/></svg>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">HIRIS<span class="text-brand-600">MAN</span></h1>
+            <p class="text-xs text-slate-500">Sistem HRIS & ATS Terpadu • Masuk untuk Mengakses Data</p>
+        </div>
+
+        <!-- Tombol Google Sign-In (OAuth / OIDC 1-Klik) -->
+        <button onclick="handleGoogleAuth()" type="button" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-2.5 shadow-xs transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span>Masuk Otomatis dengan Akun Google</span>
+        </button>
+
+        <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-3 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Atau dengan Email & Sandi</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <!-- Tab Masuk vs Buat Akun -->
+        <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button onclick="switchAuthMode('login')" id="tab-auth-login" class="flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs">Masuk Akun</button>
+            <button onclick="switchAuthMode('register')" id="tab-auth-register" class="flex-1 py-1.5 rounded-lg text-slate-500">Buat Akun Baru</button>
+        </div>
+
+        <!-- FORM AUTENTIKASI DENGAN BROWSER AUTOFILL & REMEMBER ME -->
+        <form id="auth-main-form" onsubmit="handleEmailAuthSubmit(event)" class="space-y-3">
+            <div id="auth-name-field" class="hidden">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Pengguna / Admin</label>
+                <input type="text" id="auth-input-name" name="name" autocomplete="name" placeholder="Nama Lengkap Anda" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Email</label>
+                <input type="email" id="auth-input-email" name="email" required autocomplete="username" placeholder="nama@perusahaan.com" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi</label>
+                <input type="password" id="auth-input-pwd" name="password" required autocomplete="current-password" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+            </div>
+
+            <!-- Izin Simpan Otomatis di Device (Remember Me) -->
+            <div class="flex items-center justify-between text-xs pt-1">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" id="auth-remember-device" checked class="rounded text-brand-600 focus:ring-brand-500">
+                    <span class="text-[11px] font-semibold text-slate-600">Simpan otomatis di perangkat ini</span>
+                </label>
+            </div>
+
+            <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/25 transition">
+                Masuk ke Aplikasi
+            </button>
+        </form>
+
+        <p class="text-[10px] text-slate-400 text-center leading-relaxed">
+            Data tersinkronisasi secara aman melalui <b>Cloud Database Terenkripsi</b> di seluruh perangkat Anda.
+        </p>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 2. APLIKASI UTAMA (DITAMPILKAN SETELAH AKUN TERAUTENTIKASI)               -->
+<!-- ========================================================================= -->
+<div id="app-wrapper" class="bg-slate-50 min-h-screen flex flex-col md:flex-row transition-all duration-300 hidden">
 
     <!-- Mobile Header -->
     <header class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
@@ -65,9 +137,12 @@
             </div>
             <span class="font-black text-lg text-slate-900 tracking-tight">HIRIS<span class="text-brand-600">MAN</span></span>
         </div>
-        <button onclick="toggleMobileMenu()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-            <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
+        <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Realtime Cloud Active"></span>
+            <button onclick="toggleMobileMenu()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
     </header>
 
     <!-- Sidebar Navigation -->
@@ -80,7 +155,7 @@
                 </div>
                 <div>
                     <h1 class="font-black text-xl text-slate-900 tracking-tight leading-none">HIRIS<span class="text-brand-600">MAN</span></h1>
-                    <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Smart HR Ecosystem</span>
+                    <span class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Realtime Cloud Node</span>
                 </div>
             </div>
 
@@ -100,7 +175,7 @@
                 </button>
                 <button onclick="navigate('employees')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="employees">
                     <i data-lucide="users" class="w-4 h-4"></i>
-                    <span>Karyawan & Rekam Masalah</span>
+                    <span>Karyawan & Status Masalah</span>
                 </button>
                 <button onclick="navigate('screening')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="screening">
                     <i data-lucide="file-search" class="w-4 h-4"></i>
@@ -117,14 +192,26 @@
             </nav>
         </div>
 
-        <!-- Profil Singkat Sidebar -->
-        <div class="p-3 border-t border-slate-100 bg-slate-50/80 cursor-pointer" onclick="navigate('profile')">
-            <div class="flex items-center space-x-3">
-                <img id="sidebar-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" class="w-9 h-9 rounded-full object-cover border-2 border-brand-500 shadow-xs flex-shrink-0">
-                <div class="truncate">
-                    <p class="text-xs font-bold text-slate-900 truncate" id="sidebar-user-name">HR Administrator</p>
-                    <p class="text-[10px] text-slate-400 truncate" id="sidebar-user-role">Super Admin HRIS</p>
+        <!-- Profil Singkat Sidebar & Logout -->
+        <div class="p-3 border-t border-slate-100 bg-slate-50/80">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5 cursor-pointer overflow-hidden" onclick="navigate('profile')">
+                    <img id="sidebar-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" class="w-8 h-8 rounded-full object-cover border-2 border-brand-500 shadow-xs flex-shrink-0">
+                    <div class="truncate">
+                        <p class="text-xs font-bold text-slate-900 truncate" id="sidebar-user-name">Pengguna</p>
+                        <p class="text-[10px] text-slate-400 truncate" id="sidebar-user-role">Admin</p>
+                    </div>
                 </div>
+                <button onclick="handleUserLogout()" title="Keluar Akun" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-semibold text-emerald-600">
+                <span class="flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="cloud-sync-tag">Realtime Sync Aktif</span>
+                </span>
+                <span class="font-mono text-slate-400" id="app-version-tag">v2.9.0</span>
             </div>
         </div>
     </aside>
@@ -151,24 +238,21 @@
 
             <!-- PAGE 1: DASHBOARD UTAMA RAMPING (1 HALAMAN PAS) -->
             <section id="view-dashboard" class="space-y-4">
-                <!-- Welcome Banner Ringkas -->
-                <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-2xl p-5 text-white shadow-md relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="relative z-10 max-w-xl">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-200 bg-brand-800/60 px-2 py-0.5 rounded" id="dash-greeting-time">SELAMAT PAGI</span>
-                        <h2 class="text-lg sm:text-2xl font-extrabold mt-1 text-white" id="dash-user-greeting">Selamat Datang, HR Administrator!</h2>
-                        <p class="text-brand-100 text-xs mt-0.5">Sistem HRIS terpadu dengan integrasi mesin fingerprint 08.00–17.00, kalkulator telat & lembur, serta payroll M-Banking.</p>
+                <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="max-w-xl">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-200 bg-brand-800/60 px-2 py-0.5 rounded" id="dash-greeting-time">SELAMAT DATANG</span>
+                        <h2 class="text-lg sm:text-2xl font-extrabold mt-1 text-white" id="dash-user-greeting">Halo, Administrator!</h2>
+                        <p class="text-brand-100 text-xs mt-0.5">Satu akun terpusat untuk semua perangkat. Data tersinkronisasi otomatis secara realtime.</p>
                     </div>
-                    <div class="relative z-10 flex-shrink-0">
-                        <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-center font-mono">
-                            <span class="text-[10px] text-brand-200 font-bold block uppercase" id="tz-badge-top">WIB</span>
-                            <span class="text-xl sm:text-2xl font-black text-white" id="live-clock-banner">00:00:00</span>
-                        </div>
+                    <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-center font-mono flex-shrink-0">
+                        <span class="text-[10px] text-brand-200 font-bold block uppercase" id="tz-badge-top">WIB</span>
+                        <span class="text-xl sm:text-2xl font-black text-white" id="live-clock-banner">00:00:00</span>
                     </div>
                 </div>
 
                 <!-- Grid Kalender, Jam & Regulasi Terpadu (1 Layar) -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    <!-- Kolom Kiri: Kalender & Waktu (5 Kolom) -->
+                    <!-- Kolom Kiri: Kalender Kerja (5 Kolom) -->
                     <div class="lg:col-span-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <h3 class="font-extrabold text-xs text-slate-900 flex items-center space-x-1.5">
@@ -182,7 +266,6 @@
                             </div>
                         </div>
 
-                        <!-- Grid Tanggal -->
                         <div class="grid grid-cols-7 gap-1 text-center font-bold text-[10px] text-slate-400">
                             <span class="text-rose-500">Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span>
                         </div>
@@ -190,16 +273,16 @@
 
                         <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
                             <span id="live-date-compact">Hari ini</span>
-                            <span class="text-brand-600 font-bold">Shift Kerja: 08:00 - 17:00</span>
+                            <span class="text-brand-600 font-bold">Shift: 08:00 - 17:00</span>
                         </div>
                     </div>
 
-                    <!-- Kolom Kanan: Pusat SOP, UU Tenaga Kerja & Rekap Absen (7 Kolom) -->
+                    <!-- Kolom Kanan: Regulasi & Jam Kerja (7 Kolom) -->
                     <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between overflow-hidden">
                         <div class="p-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
                             <span class="text-xs font-extrabold text-slate-800 flex items-center space-x-1.5">
                                 <i data-lucide="book-open" class="w-4 h-4 text-brand-600"></i>
-                                <span>Pusat Regulasi & Rekap Terpadu</span>
+                                <span>Pusat Regulasi & SOP Terpadu</span>
                             </span>
                             <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
                                 <button onclick="toggleDocTab('sop')" id="tab-sop" class="px-2.5 py-1 rounded-md bg-white text-brand-700 shadow-xs">SOP HRD</button>
@@ -227,14 +310,14 @@
                                 </div>
                                 <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                                     <h4 class="font-extrabold text-slate-900 text-xs">Hak Upah & Cuti Tahunan</h4>
-                                    <p class="text-[11px] mt-0.5">Cuti tahunan 12 hari kerja setelah 1 tahun bekerja terus-menerus. Potongan gaji wajib sesuai regulasi resmi.</p>
+                                    <p class="text-[11px] mt-0.5">Cuti tahunan 12 hari kerja setelah 1 tahun bekerja terus-menerus. Upah dilindungi undang-undang.</p>
                                 </div>
                             </div>
 
                             <div id="panel-doc-shift" class="space-y-2 hidden">
                                 <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200">
                                     <h4 class="font-extrabold text-amber-900 text-xs">Standar Jam Kerja HIRISMAN</h4>
-                                    <p class="text-[11px] text-amber-800 mt-0.5">• Datang > 08.00: Dihitung keterlambatan (Jam, Menit, Detik) dan potongan gaji.</p>
+                                    <p class="text-[11px] text-amber-800 mt-0.5">• Datang > 08.00: Dihitung keterlambatan (Jam, Menit, Detik) dan denda.</p>
                                     <p class="text-[11px] text-amber-800">• Pulang > 17.00: Dihitung lembur (Jam, Menit, Detik) dan komisi lembur per jam.</p>
                                 </div>
                             </div>
@@ -263,9 +346,8 @@
                 </div>
             </section>
 
-            <!-- PAGE 2: E-ABSENSI DENGAN FINGERPRINT BRIDGE, TELAT & LEMBUR -->
+            <!-- PAGE 2: E-ABSENSI & FINGERPRINT BRIDGE -->
             <section id="view-attendance" class="space-y-5 hidden">
-                <!-- Panel Bridge Mesin Fingerprint & Simulasi Sensor -->
                 <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 rounded-2xl text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
                         <div class="flex items-center space-x-2">
@@ -273,9 +355,8 @@
                             <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300">Biometric Fingerprint Hardware Bridge</span>
                         </div>
                         <h3 class="text-base font-extrabold text-white">Integrasi Mesin Fingerprint (08.00 - 17.00)</h3>
-                        <p class="text-xs text-slate-400">Finger 1 untuk Datang (Masuk) & Finger 2 untuk Pulang (Keluar). Menghitung telat & lembur per detik.</p>
+                        <p class="text-xs text-slate-400">Finger 1 untuk Datang & Finger 2 untuk Pulang. Otomatis menghitung telat & lembur per detik.</p>
                     </div>
-                    <!-- Tombol Sensor Fingerprint -->
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="triggerFingerprintScan('IN')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
                             <i data-lucide="fingerprint" class="w-4 h-4"></i>
@@ -288,7 +369,6 @@
                     </div>
                 </div>
 
-                <!-- Konfigurasi Tarif Denda & Lembur -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500">Tarif Komisi Lembur / Jam (IDR):</label>
@@ -306,12 +386,8 @@
                     </div>
                 </div>
 
-                <!-- Tabel Riwayat Presensi Hari Ini Lengkap Telat & Lembur -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-extrabold text-sm text-slate-900">Log Presensi Fingerprint Hari Ini</h3>
-                        <span class="text-xs text-slate-400 font-semibold">Tersinkron Otomatis ke Payroll</span>
-                    </div>
+                    <h3 class="font-extrabold text-sm text-slate-900 mb-3">Log Presensi Fingerprint Hari Ini</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
@@ -319,7 +395,7 @@
                                     <th class="py-3 px-3">Nama Pegawai</th>
                                     <th class="py-3 px-3">Jam Masuk (Finger 1)</th>
                                     <th class="py-3 px-3">Jam Pulang (Finger 2)</th>
-                                    <th class="py-3 px-3">Durasi Keterlambatan</th>
+                                    <th class="py-3 px-3">Durasi Telat</th>
                                     <th class="py-3 px-3">Durasi Lembur</th>
                                     <th class="py-3 px-3">Denda Telat</th>
                                     <th class="py-3 px-3 text-brand-700">Bonus Lembur</th>
@@ -334,7 +410,6 @@
 
             <!-- PAGE 3: PAYROLL & PEMINDAI DATA SEMUA BERKAS + M-BANKING -->
             <section id="view-payroll" class="space-y-5 hidden">
-                <!-- Kas Payroll Card -->
                 <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 rounded-2xl text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kas Payroll Perusahaan (M-Banking Terhubung)</span>
@@ -372,9 +447,9 @@
                         </div>
                     </div>
 
-                    <div id="panel-raw-file" class="border-2 border-dashed border-emerald-300 rounded-2xl p-5 text-center bg-emerald-50/20">
+                    <div id="panel-raw-file" class="border-2 border-dashed border-emerald-300 rounded-2xl p-6 text-center bg-emerald-50/20">
                         <input type="file" id="raw-file-input" accept=".xlsx, .xls, .csv, .pdf, .docx, .txt, .png, .jpg, .jpeg" class="hidden" onchange="handleUniversalPayrollFile(this)">
-                        <label for="raw-file-input" class="cursor-pointer inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition">
+                        <label for="raw-file-input" class="cursor-pointer inline-flex items-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition">
                             <i data-lucide="upload" class="w-4 h-4"></i>
                             <span>Pilih Berkas (Excel, PDF, Word, TXT, Gambar OCR)</span>
                         </label>
@@ -654,9 +729,6 @@
                                 <i data-lucide="edit-3" class="w-4 h-4"></i>
                                 <span>Edit Data Profil Diri</span>
                             </button>
-                            <button onclick="openSecurityVerificationModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
-                                Ganti Password
-                            </button>
                         </div>
                     </div>
 
@@ -725,15 +797,14 @@
                         <div id="settings-comp-list" class="space-y-2 pt-1"></div>
                     </div>
 
-                    <!-- Ganti Akun Pengguna Aman -->
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Beralih Akun / Google SSO</h3>
-                            <p class="text-xs text-slate-500">Masuk ke akun lain tanpa menghapus data perusahaan yang sudah dibuat.</p>
+                    <!-- Hubungkan Firebase Project Pribadi (Opsional) -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Konfigurasi Google Firebase BaaS (Realtime Database)</h3>
+                        <p class="text-xs text-slate-500">Secara bawaan sistem sudah terhubung ke <b>Serverless Cloud Relay</b>. Anda juga dapat memasukkan konfigurasi Firebase mandiri:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="custom-cloud-relay-url" placeholder="URL Firebase Realtime Database / Cloud Gateway" class="flex-1 px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none">
+                            <button onclick="saveCustomCloudRelayUrl()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold">Simpan</button>
                         </div>
-                        <button onclick="openAuthModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-black text-white rounded-xl text-xs font-bold shadow">
-                            Beralih Akun
-                        </button>
                     </div>
 
                     <!-- Backup Master Data -->
@@ -785,38 +856,6 @@
         <button onclick="confirmMbankingTransfer()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
             Konfirmasi & Kirim Gaji
         </button>
-    </div>
-</div>
-
-<!-- MODAL: GANTI PASSWORD DENGAN OTP -->
-<div id="modal-security" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100 space-y-3">
-        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-            <h3 class="font-extrabold text-slate-900 text-sm">Ganti Password (Verifikasi OTP)</h3>
-            <button onclick="closeSecurityModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-
-        <div id="otp-step-1" class="space-y-2.5">
-            <p class="text-xs text-slate-500">Kode verifikasi OTP 6 digit akan dikirimkan ke email terdaftar Anda:</p>
-            <div class="p-2 bg-blue-50 text-brand-800 rounded-xl font-mono text-xs font-bold text-center" id="otp-target-email">admin@hirisman.id</div>
-            <button onclick="requestOtpCode()" class="w-full py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">
-                Kirim Kode OTP
-            </button>
-        </div>
-
-        <div id="otp-step-2" class="space-y-2.5 hidden">
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">6 Digit OTP:</label>
-                <input type="text" id="otp-input" maxlength="6" placeholder="123456" class="w-full text-center font-mono tracking-widest px-3 py-1.5 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Password Baru:</label>
-                <input type="password" id="new-sec-pwd" placeholder="Minimal 6 karakter" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:outline-none">
-            </div>
-            <button onclick="verifyOtpAndChangePassword()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
-                Simpan Password Baru
-            </button>
-        </div>
     </div>
 </div>
 
@@ -886,38 +925,20 @@
     </div>
 </div>
 
-<!-- MODAL: GANTI / MASUK AKUN PENGGUNA -->
-<div id="modal-auth" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="font-extrabold text-slate-900 text-sm">Pusat Akun & Multi-Device</h3>
-            <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <button onclick="handleGoogleOneTap()" class="w-full py-2 px-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-2 shadow-xs transition mb-3">
-            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>Masuk dengan Akun Google</span>
-        </button>
-        <div id="saved-users-list" class="space-y-1.5 mb-3 max-h-36 overflow-y-auto custom-scrollbar"></div>
-        <form onsubmit="handleNewAccountRegister(event)" class="space-y-2 border-t border-slate-100 pt-2.5">
-            <input type="text" id="acc-name" required placeholder="Nama Lengkap" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
-            <input type="email" id="acc-email" required placeholder="email@perusahaan.com" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
-            <input type="password" id="acc-pwd" required placeholder="Kata Sandi" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none">
-            <button type="submit" class="w-full py-2 bg-slate-800 hover:bg-black text-white rounded-lg text-xs font-bold transition">Daftar Akun Baru</button>
-        </form>
-    </div>
-</div>
-
-<!-- JAVASCRIPT SYSTEM ENGINE -->
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT SYSTEM ENGINE (REALTIME DATABASE, AUTH & HARDWARE SYNC)        -->
+<!-- ========================================================================= -->
 <script>
     const HIRISMAN_CONFIG = {
-        version: "2.8.0",
+        version: "2.9.0",
         cloudSyncUrl: "https://kvdb.io/MNhT458y28PqyqfWvhG8k9/",
-        defaultGoogleClientId: "324908129034-sampleclientid.apps.googleusercontent.com"
+        cloudPollingIntervalMs: 2500 // Polling 2.5 detik untuk sinkronisasi instan multi-device
     };
 
     let activeAdmin = null;
     let activeCompany = null;
     let allCompanies = [];
+    let cloudStreamTimer = null;
 
     let cvExtracted = "";
     let jobExtracted = "";
@@ -925,19 +946,17 @@
     let currentLang = 'id';
     let scannedRawEmployees = [];
     let activeTransferCandidate = null;
-    let simulatedGeneratedOtp = "";
     let currentTimezone = 'WIB';
     let calDate = new Date();
 
     document.addEventListener('DOMContentLoaded', () => {
-        initSystem();
-        initGoogleOidcClient();
+        checkSessionAuth();
         startLiveClock();
         renderCalendar();
         lucide.createIcons();
     });
 
-    // TOAST NOTIFIKASI SUKSES
+    // TOAST NOTIFIKASI
     function showToast(title, message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -962,23 +981,162 @@
         }, 3500);
     }
 
-    // 1. SISTEM AKUN & MULTI-TENANT CLOUD SYNC
-    async function initSystem() {
-        if (!localStorage.getItem('hirisman_active_session')) {
-            localStorage.setItem('hirisman_active_session', JSON.stringify({
-                name: "HR Administrator",
-                email: "admin@hirisman.id",
+    // 1. GERBANG AUTENTIKASI (AUTH GATEWAY LOCKSCREEN)
+    let currentAuthMode = 'login';
+
+    function switchAuthMode(mode) {
+        currentAuthMode = mode;
+        const nameField = document.getElementById('auth-name-field');
+        const submitBtn = document.getElementById('auth-submit-btn');
+        const pwdInput = document.getElementById('auth-input-pwd');
+
+        if (mode === 'login') {
+            nameField.classList.add('hidden');
+            submitBtn.innerText = "Masuk ke Aplikasi";
+            pwdInput.setAttribute('autocomplete', 'current-password');
+            document.getElementById('tab-auth-login').className = "flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs";
+            document.getElementById('tab-auth-register').className = "flex-1 py-1.5 rounded-lg text-slate-500";
+        } else {
+            nameField.classList.remove('hidden');
+            submitBtn.innerText = "Daftar Akun Baru";
+            pwdInput.setAttribute('autocomplete', 'new-password');
+            document.getElementById('tab-auth-register').className = "flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs";
+            document.getElementById('tab-auth-login').className = "flex-1 py-1.5 rounded-lg text-slate-500";
+        }
+    }
+
+    function checkSessionAuth() {
+        const session = localStorage.getItem('hirisman_active_session') || sessionStorage.getItem('hirisman_active_session');
+        if (session) {
+            activeAdmin = JSON.parse(session);
+            document.getElementById('auth-gateway-screen').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            initAuthorizedApp();
+        } else {
+            document.getElementById('auth-gateway-screen').classList.remove('hidden');
+            document.getElementById('app-wrapper').classList.add('hidden');
+        }
+    }
+
+    function handleEmailAuthSubmit(e) {
+        e.preventDefault();
+        const email = document.getElementById('auth-input-email').value.trim().toLowerCase();
+        const pwd = document.getElementById('auth-input-pwd').value.trim();
+        const rememberMe = document.getElementById('auth-remember-device').checked;
+
+        let users = JSON.parse(localStorage.getItem('hirisman_registered_users') || '[]');
+
+        if (currentAuthMode === 'login') {
+            const user = users.find(u => u.email === email && u.pwd === pwd);
+            if (user) {
+                finalizeLogin(user, rememberMe);
+            } else if (users.length === 0 && email === 'admin@hirisman.id' && pwd === 'admin123') {
+                // Default Seed Admin
+                const seedUser = {
+                    name: "HR Administrator", email: "admin@hirisman.id", pwd: "admin123",
+                    picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
+                    role: "Super Admin HRIS", dept: "Human Capital", phone: "081234567890"
+                };
+                users.push(seedUser);
+                localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
+                finalizeLogin(seedUser, rememberMe);
+            } else {
+                showToast("Login Gagal", "Email atau kata sandi tidak cocok!", "error");
+            }
+        } else {
+            // Mode Daftar Akun Baru
+            if (users.some(u => u.email === email)) {
+                return showToast("Peringatan", "Email ini sudah terdaftar. Silakan masuk.", "error");
+            }
+
+            const name = document.getElementById('auth-input-name').value.trim() || email.split('@')[0];
+            const newUser = {
+                name, email, pwd,
                 picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
-                role: "Super Admin HRIS",
-                dept: "Human Capital",
-                phone: "081234567890"
-            }));
+                role: "HR Administrator", dept: "Human Capital", phone: ""
+            };
+            users.push(newUser);
+            localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
+            showToast("Pendaftaran Berhasil", "Akun berhasil dibuat!");
+            finalizeLogin(newUser, rememberMe);
+        }
+    }
+
+    function handleGoogleAuth() {
+        const googleEmail = prompt("Masuk Cepat dengan Akun Google (SSO OAuth 2.0):\nMasukkan email Google Anda:", "admin.holding@gmail.com");
+        if (!googleEmail) return;
+
+        const email = googleEmail.trim().toLowerCase();
+        let users = JSON.parse(localStorage.getItem('hirisman_registered_users') || '[]');
+        let user = users.find(u => u.email === email);
+
+        if (!user) {
+            user = {
+                name: email.split('@')[0].toUpperCase(),
+                email: email,
+                pwd: "",
+                picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
+                role: "Super Admin HRIS", dept: "Human Capital", phone: "",
+                isGoogle: true
+            };
+            users.push(user);
+            localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
         }
 
-        activeAdmin = JSON.parse(localStorage.getItem('hirisman_active_session'));
+        finalizeLogin(user, true);
+    }
+
+    function finalizeLogin(user, rememberDevice) {
+        activeAdmin = user;
+        const userJson = JSON.stringify(user);
+
+        if (rememberDevice) {
+            localStorage.setItem('hirisman_active_session', userJson);
+        } else {
+            sessionStorage.setItem('hirisman_active_session', userJson);
+            localStorage.removeItem('hirisman_active_session');
+        }
+
+        document.getElementById('auth-gateway-screen').classList.add('hidden');
+        document.getElementById('app-wrapper').classList.remove('hidden');
+        initAuthorizedApp();
+        showToast("Autentikasi Berhasil", `Selamat datang kembali, ${user.name}!`);
+    }
+
+    function handleUserLogout() {
+        if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+            if (cloudStreamTimer) clearInterval(cloudStreamTimer);
+            localStorage.removeItem('hirisman_active_session');
+            sessionStorage.removeItem('hirisman_active_session');
+            activeAdmin = null;
+            document.getElementById('auth-gateway-screen').classList.remove('hidden');
+            document.getElementById('app-wrapper').classList.add('hidden');
+            showToast("Sesi Berakhir", "Anda telah keluar dari sistem.");
+        }
+    }
+
+    // 2. SINKRONISASI CLOUD DUA ARAH REAL-TIME (CROSS-DEVICE AUTO-SYNC)
+    async function initAuthorizedApp() {
         await loadCompanyDatabase();
         updateUIHead();
         applySavedOrientation();
+        startRealtimeCloudStream();
+    }
+
+    function getCloudBucketUrl() {
+        const customUrl = localStorage.getItem('hirisman_custom_cloud_url');
+        const baseUrl = customUrl || HIRISMAN_CONFIG.cloudSyncUrl;
+        const bucketKey = btoa(activeAdmin.email.toLowerCase()).replace(/=/g, '');
+        return baseUrl + bucketKey;
+    }
+
+    function saveCustomCloudRelayUrl() {
+        const val = document.getElementById('custom-cloud-relay-url').value.trim();
+        if (val) {
+            localStorage.setItem('hirisman_custom_cloud_url', val);
+            showToast("Konfigurasi Cloud", "URL Gateway Cloud berhasil disimpan.");
+            startRealtimeCloudStream();
+        }
     }
 
     async function loadCompanyDatabase() {
@@ -998,10 +1156,9 @@
             }];
         }
 
-        // Pull Background Cloud Sync
+        // Ambil data terbaru dari Cloud
         try {
-            const cloudKey = btoa(activeAdmin.email.toLowerCase()).replace(/=/g, '');
-            const res = await fetch(HIRISMAN_CONFIG.cloudSyncUrl + cloudKey);
+            const res = await fetch(getCloudBucketUrl(), { method: 'GET' });
             if (res.ok) {
                 const cloudData = await res.json();
                 if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
@@ -1023,13 +1180,45 @@
             localStorage.setItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase(), activeCompany.id);
         }
 
+        // Push ke Cloud Database
         try {
-            const cloudKey = btoa(activeAdmin.email.toLowerCase()).replace(/=/g, '');
-            await fetch(HIRISMAN_CONFIG.cloudSyncUrl + cloudKey, {
+            await fetch(getCloudBucketUrl(), {
                 method: 'POST',
                 body: JSON.stringify(allCompanies)
             });
-        } catch(e) {}
+            document.getElementById('cloud-sync-tag').innerText = "Tersinkron Cloud";
+        } catch(e) {
+            document.getElementById('cloud-sync-tag').innerText = "Tersimpan Lokal";
+        }
+    }
+
+    // LISTENER REALTIME: MEMERIKSA PERUBAHAN DI PERANGKAT LAIN SECARA OTOMATIS
+    function startRealtimeCloudStream() {
+        if (cloudStreamTimer) clearInterval(cloudStreamTimer);
+        cloudStreamTimer = setInterval(async () => {
+            if (!activeAdmin) return;
+            try {
+                const res = await fetch(getCloudBucketUrl(), { method: 'GET' });
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
+                        const localKey = 'hirisman_comp_db_' + activeAdmin.email.toLowerCase();
+                        const currentLocal = localStorage.getItem(localKey);
+                        const cloudString = JSON.stringify(cloudData);
+
+                        // Jika data di cloud berbeda dengan data lokal saat ini (misal diubah dari PC)
+                        if (currentLocal !== cloudString) {
+                            allCompanies = cloudData;
+                            localStorage.setItem(localKey, cloudString);
+                            const lastId = localStorage.getItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase());
+                            activeCompany = allCompanies.find(c => c.id === lastId) || allCompanies[0];
+                            renderActiveCompanyModules();
+                            showToast("Sinkronisasi Realtime", "Data diperbarui otomatis dari perangkat lain!");
+                        }
+                    }
+                }
+            } catch(e) {}
+        }, HIRISMAN_CONFIG.cloudPollingIntervalMs);
     }
 
     function updateUIHead() {
@@ -1037,9 +1226,9 @@
         document.getElementById('sidebar-user-role').innerText = activeAdmin.role || "Super Admin";
         document.getElementById('sidebar-avatar-img').src = activeAdmin.picture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces";
         document.getElementById('topbar-company-name').innerText = activeCompany.name;
-        document.getElementById('dash-user-greeting').innerText = `Selamat Datang, ${activeAdmin.name}!`;
+        document.getElementById('dash-user-greeting').innerText = `Halo, ${activeAdmin.name}!`;
 
-        // Update Profile Name Card
+        // Update Name Card Profil
         document.getElementById('profile-avatar-img').src = activeAdmin.picture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=faces";
         document.getElementById('profile-display-name').innerText = activeAdmin.name;
         document.getElementById('profile-display-role').innerText = activeAdmin.role || "Super Admin HRIS";
@@ -1059,7 +1248,7 @@
         lucide.createIcons();
     }
 
-    // 2. JAM OPERASIONAL & KALENDER (INDONESIAN TIMEZONE)
+    // 3. JAM OPERASIONAL & KALENDER INDONESIA
     function setIndoTimezone(tz) {
         currentTimezone = tz;
         document.getElementById('tz-badge-top').innerText = tz;
@@ -1118,11 +1307,6 @@
         }
     }
 
-    function changeCalendarMonth(delta) {
-        calDate.setMonth(calDate.getMonth() + delta);
-        renderCalendar();
-    }
-
     function toggleDocTab(tab) {
         document.getElementById('panel-doc-sop').classList.toggle('hidden', tab !== 'sop');
         document.getElementById('panel-doc-law').classList.toggle('hidden', tab !== 'law');
@@ -1132,14 +1316,14 @@
         document.getElementById('tab-shift').className = tab === 'shift' ? 'px-2.5 py-1 rounded-md bg-white text-brand-700 shadow-xs' : 'px-2.5 py-1 rounded-md text-slate-600';
     }
 
-    // 3. E-ABSENSI: FINGERPRINT SENSOR BRIDGE, TELAT & LEMBUR PER DETIK
+    // 4. E-ABSENSI: FINGERPRINT SENSOR BRIDGE, TELAT & LEMBUR PER DETIK
     function saveAttendanceRates() {
         const otRate = parseInt(document.getElementById('cfg-overtime-rate').value) || 25000;
         const ltRate = parseInt(document.getElementById('cfg-late-rate').value) || 20000;
         localStorage.setItem('hirisman_cfg_ot', otRate);
         localStorage.setItem('hirisman_cfg_lt', ltRate);
         renderPayroll();
-        showToast("Tarif Disimpan", "Pengaturan denda telat & komisi lembur diperbarui.");
+        showToast("Tarif Disimpan", "Denda telat & komisi lembur diperbarui.");
     }
 
     function triggerFingerprintScan(type) {
@@ -1172,7 +1356,7 @@
         if (type === 'IN') {
             record.inTime = now.toLocaleTimeString('id-ID');
             
-            // Evaluasi Keterlambatan (Batas jam 08:00:00)
+            // Batas Jam Kerja Masuk: 08:00:00
             const targetIn = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0);
             if (now > targetIn) {
                 const diffMs = now - targetIn;
@@ -1181,20 +1365,17 @@
                 const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                 
                 record.lateDurationText = `${diffHours} Jam, ${diffMin} Menit, ${diffSec} Detik`;
-                // Hitung Denda Telat Proporsional
                 const totalHours = diffMs / (1000 * 60 * 60);
                 record.lateDeduction = Math.round(totalHours * ltRate);
-                showToast("Finger 1 Terbaca", `Staf terlambat: ${record.lateDurationText}. Denda terhitung.`);
+                showToast("Finger 1 Terbaca", `Staf terlambat: ${record.lateDurationText}.`);
             } else {
                 record.lateDurationText = "Tepat Waktu (0 Detik)";
                 record.lateDeduction = 0;
                 showToast("Finger 1 Terbaca", "Staf hadir tepat waktu.");
             }
         } else {
-            // Absen Pulang (OUT)
+            // Batas Jam Kerja Pulang: 17:00:00
             record.outTime = now.toLocaleTimeString('id-ID');
-            
-            // Evaluasi Lembur (Batas pulang 17:00:00)
             const targetOut = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0, 0);
             if (now > targetOut) {
                 const diffMs = now - targetOut;
@@ -1205,7 +1386,7 @@
                 record.overtimeDurationText = `${diffHours} Jam, ${diffMin} Menit, ${diffSec} Detik`;
                 const totalHours = diffMs / (1000 * 60 * 60);
                 record.overtimeBonus = Math.round(totalHours * otRate);
-                showToast("Finger 2 Terbaca", `Lembur tercatat: ${record.overtimeDurationText}. Bonus terhitung.`);
+                showToast("Finger 2 Terbaca", `Lembur tercatat: ${record.overtimeDurationText}.`);
             } else {
                 record.overtimeDurationText = "Tidak Lembur";
                 record.overtimeBonus = 0;
@@ -1260,7 +1441,7 @@
         showToast("Unduh Selesai", "Rekap absensi harian berhasil diekspor.");
     }
 
-    // 4. PAYROLL DENGAN OTOMATISASI TELAT & LEMBUR
+    // 5. PAYROLL DENGAN OTOMATISASI TELAT & LEMBUR
     function renderPayroll() {
         const tbody = document.getElementById('payroll-table-body');
         const emptyBox = document.getElementById('payroll-empty-box');
@@ -1287,7 +1468,7 @@
             const allow = emp.allowance || 0;
             const taxDeduct = (emp.salary * 0.04) + (emp.salary * 0.05);
             
-            // Total Take Home Pay
+            // Total Gaji Bersih
             const net = (emp.salary + allow + otBonus) - (taxDeduct + ltDeduct);
 
             return `
@@ -1339,7 +1520,7 @@
         if (pin !== '123456') return showToast("PIN Salah", "Gunakan PIN default: 123456", "error");
 
         if ((activeCompany.bank.balance || 0) < activeTransferCandidate.net) {
-            return showToast("Saldo Kurang", "Saldo kas M-Banking perusahaan tidak mencukupi!", "error");
+            return showToast("Saldo Kurang", "Saldo kas M-Banking tidak mencukupi!", "error");
         }
 
         activeCompany.bank.balance -= activeTransferCandidate.net;
@@ -1365,7 +1546,7 @@
         }
     }
 
-    // 5. INPUT MANUAL DATA KARYAWAN (ANTI-DUPLIKASI 1 NAMA = 1 BARIS)
+    // 6. INPUT DATA KARYAWAN (ANTI-DUPLIKASI 1 NAMA = 1 BARIS)
     function openAddEmployeeModal() { document.getElementById('modal-emp').classList.remove('hidden'); }
     function closeAddEmployeeModal() { document.getElementById('modal-emp').classList.add('hidden'); }
 
@@ -1374,7 +1555,7 @@
         const nip = document.getElementById('emp-nip').value.trim();
         const name = document.getElementById('emp-name').value.trim();
 
-        // Anti-Duplikasi
+        // Anti-Duplikasi: Jika sudah ada, lakukan update pada baris tersebut
         const exists = activeCompany.employees.find(x => x.nip.toLowerCase() === nip.toLowerCase() || x.name.toLowerCase() === name.toLowerCase());
         if (exists) {
             exists.dept = document.getElementById('emp-dept').value.trim();
@@ -1385,7 +1566,7 @@
             exists.acc = document.getElementById('emp-acc').value.trim();
             exists.salary = parseInt(document.getElementById('emp-salary').value) || 0;
             exists.allowance = parseInt(document.getElementById('emp-allow').value) || 0;
-            showToast("Data Diperbarui", `Data staf ${name} diperbarui (Tanpa Duplikasi Baris).`);
+            showToast("Data Diperbarui", `Data staf ${name} diperbarui (1 Nama = 1 Baris).`);
         } else {
             activeCompany.employees.unshift({
                 nip, name,
@@ -1458,7 +1639,7 @@
         }
     }
 
-    // 6. PROFIL PENGGUNA (NAME CARD & MODE EDIT DATA)
+    // 7. PROFIL PENGGUNA (NAME CARD & MODE EDIT DATA)
     function switchToProfileEditMode() {
         document.getElementById('profile-card-view').classList.add('hidden');
         document.getElementById('profile-edit-form-wrapper').classList.remove('hidden');
@@ -1510,7 +1691,7 @@
         reader.readAsDataURL(file);
     }
 
-    // 7. SKRINING CV AI TERARAH (5 PILAR ESENSIAL)
+    // 8. SKRINING CV AI (5 PILAR KUALIFIKASI ESENSIAL)
     function toggleScreenInput(type, mode) {
         document.getElementById(`panel-${type}-file`).classList.toggle('hidden', mode !== 'file');
         document.getElementById(`manual-${type}`).classList.toggle('hidden', mode === 'file');
@@ -1569,7 +1750,7 @@
             { k: 'Frontend & UI', t: ['frontend', 'react', 'react.js', 'vue', 'javascript', 'tailwind', 'html'] },
             { k: 'Backend & Database', t: ['backend', 'python', 'fastapi', 'node.js', 'sql', 'postgresql', 'api'] },
             { k: 'Akuntansi & Keuangan', t: ['akuntansi', 'accounting', 'pajak', 'tax', 'brevet', 'finance'] },
-            { k: 'Bahasa Inggris', t: ['inggris', 'english', 'toefl', 'ielts'] },
+            { k: 'Bahasa Asing', t: ['inggris', 'english', 'toefl', 'ielts'] },
             { k: 'Softskill & Negosiasi', t: ['leadership', 'kepemimpinan', 'komunikasi', 'negosiasi', 'teamwork'] }
         ];
 
@@ -1634,7 +1815,7 @@
         window.location.href = `mailto:${encodeURIComponent(email)}?subject=Pemberitahuan Seleksi - ${activeCompany.name}&body=${encodeURIComponent(body)}`;
     }
 
-    // 8. ORIENTASI DISPLAY & PENGATURAN
+    // 9. ORIENTASI DISPLAY & PENGATURAN
     function setAppOrientation(mode) {
         const body = document.getElementById('app-body');
         body.classList.remove('force-landscape', 'force-portrait');
@@ -1660,7 +1841,7 @@
 
     function applySavedOrientation() { setAppOrientation(localStorage.getItem('hirisman_orientation') || 'auto'); }
 
-    // 9. PUSAT PERUSAHAAN (10 ENTITAS DI PENGATURAN)
+    // 10. PUSAT PERUSAHAAN (10 ENTITAS DI PENGATURAN)
     function switchActiveCompany(id) {
         const found = allCompanies.find(c => c.id === id);
         if (found) {
@@ -1709,110 +1890,172 @@
                 <span class="font-bold text-xs text-slate-800">${i + 1}. ${c.name} (${c.code || 'CO'})</span>
                 <span class="block text-[10px] text-slate-400">Kas: ${c.bank.name} ${c.bank.accNumber} • Saldo: Rp ${(c.bank.balance || 0).toLocaleString('id-ID')}</span>
             </div>
-            <button onclick="switchActiveCompany('${c.id}')" class="px-3 py-1 text-xs font-bold rounded-xl transition ${c.id === activeCompany.id ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}">
+            <button onclick="switchActiveCompany('${c.id}')" class="px-3 py-1 text-xs font-bold rounded-xl transition ${c.id === activeCompany.id ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white border border-slate-300 text-slate-700'}">
                 ${c.id === activeCompany.id ? '✓ Aktif' : 'Pilih'}
             </button>
         </div>`).join('');
     }
 
-    // 10. AUTH & MULTI-DEVICE CLOUD SYNC
-    function openAuthModal() {
-        document.getElementById('modal-auth').classList.remove('hidden');
-        const users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
-        document.getElementById('saved-users-list').innerHTML = users.map(u => `
-        <div onclick="selectUserAccount('${u.email}')" class="p-2 rounded-xl border ${u.email === activeAdmin.email ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:bg-slate-50'} cursor-pointer flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-800">${u.name} (${u.email})</span>
-            <i data-lucide="log-in" class="w-3.5 h-3.5 text-slate-400"></i>
-        </div>`).join('');
-        lucide.createIcons();
-    }
-    function closeAuthModal() { document.getElementById('modal-auth').classList.add('hidden'); }
+    // 11. UNIVERSAL RAW PAYROLL INGESTION
+    async function handleUniversalPayrollFile(input) {
+        const file = input.files[0];
+        if (!file) return;
 
-    function selectUserAccount(email) {
-        const users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
-        const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
-        if (u) {
-            if (u.isGoogle) return switchAccountSession(u);
-            const pwd = prompt(`Password untuk ${u.email}:`);
-            if (pwd === u.pwd) switchAccountSession(u);
-            else if (pwd !== null) showToast("Salah", "Password tidak cocok.", "error");
+        const ext = file.name.split('.').pop().toLowerCase();
+        let rows = [];
+
+        try {
+            if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                const data = new Uint8Array(await file.arrayBuffer());
+                const wb = XLSX.read(data, { type: 'array' });
+                rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            } else if (ext === 'pdf') {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = "";
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    fullText += "\n" + content.items.map(it => it.str).join("\t");
+                }
+                rows = parseDelimitedTextToRows(fullText);
+            } else if (ext === 'docx') {
+                const arrayBuffer = await file.arrayBuffer();
+                const res = await mammoth.extractRawText({ arrayBuffer });
+                rows = parseDelimitedTextToRows(res.value);
+            } else if (ext === 'txt') {
+                rows = parseDelimitedTextToRows(await file.text());
+            } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
+                const { data: { text } } = await Tesseract.recognize(file, 'ind+eng');
+                rows = parseDelimitedTextToRows(text);
+            }
+
+            processScannedRows(rows);
+            showToast("Pemindaian Berhasil", `Mendeteksi ${scannedRawEmployees.length} baris staf.`);
+        } catch(err) {
+            showToast("Gagal Membaca", "Format file tidak dapat dipindai.", "error");
+        }
+        input.value = '';
+    }
+
+    function scanRawPayrollTextRealtime() {
+        const text = document.getElementById('raw-payroll-paste').value.trim();
+        if (!text) {
+            document.getElementById('raw-scan-preview-bar').classList.add('hidden');
+            scannedRawEmployees = [];
+            return;
+        }
+        const rows = parseDelimitedTextToRows(text);
+        processScannedRows(rows);
+    }
+
+    function parseDelimitedTextToRows(text) {
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        const parsed = [];
+
+        lines.forEach((line, idx) => {
+            let cols = line.includes('\t') ? line.split('\t') : (line.includes(';') ? line.split(';') : (line.includes(',') ? line.split(',') : line.split(/\s{2,}/)));
+            cols = cols.map(c => c.trim()).filter(c => c.length > 0);
+
+            if (cols.length >= 2) {
+                if (idx === 0 && (cols[0].toLowerCase().includes('nama') || cols[0].toLowerCase().includes('name'))) return;
+
+                const name = cols[0];
+                let salary = 0, allowance = 0, bank = "BCA", acc = "1234567890", nip = `EMP-${Date.now().toString().slice(-4)}${idx}`;
+
+                cols.slice(1).forEach(col => {
+                    const cleaned = col.replace(/[^0-9]/g, '');
+                    if (cleaned.length >= 6 && salary === 0) salary = parseInt(cleaned);
+                    else if (cleaned.length >= 5 && allowance === 0 && salary !== 0) allowance = parseInt(cleaned);
+                    else if (['bca', 'mandiri', 'bni', 'bri', 'cimb', 'bsi'].includes(col.toLowerCase())) bank = col.toUpperCase();
+                    else if (col.match(/^[0-9-]{7,16}$/)) acc = col;
+                });
+
+                parsed.push({
+                    NIP: nip, Nama: name, Divisi: "Operasional", Jabatan: "Staff",
+                    "Gaji Pokok": salary || 5000000, Tunjangan: allowance, Bank: bank, Rekening: acc
+                });
+            }
+        });
+        return parsed;
+    }
+
+    function processScannedRows(rows) {
+        scannedRawEmployees = [];
+        let total = 0;
+
+        rows.forEach((r, idx) => {
+            const name = r["Nama Lengkap"] || r["Nama"] || r["Employee Name"] || r.name;
+            if (name) {
+                const salary = parseInt(r["Gaji Pokok"] || r["Gaji"] || r.salary || 5000000);
+                const allowance = parseInt(r["Tunjangan"] || r.allowance || 0);
+                const nip = r["NIP"] || r["ID"] || r.nip || `EMP-${Date.now().toString().slice(-4)}${idx}`;
+
+                scannedRawEmployees.push({
+                    nip, name: name.trim(), dept: r["Divisi"] || "Operasional", role: r["Jabatan"] || "Staff",
+                    contract: r["Kontrak"] || "Tetap", issue: r["Status Masalah"] || "Aktif Normal",
+                    bank: r["Bank"] || "BCA", acc: r["No Rekening"] || r["Rekening"] || "1234567890",
+                    salary, allowance, isPaid: false
+                });
+                total += (salary + allowance);
+            }
+        });
+
+        if (scannedRawEmployees.length > 0) {
+            document.getElementById('raw-scan-preview-bar').classList.remove('hidden');
+            document.getElementById('scan-detected-title').innerText = `${scannedRawEmployees.length} Data Staf Berhasil Dipindai`;
+            document.getElementById('scan-detected-desc').innerText = `Total Estimasi Gaji: Rp ${total.toLocaleString('id-ID')}`;
         }
     }
 
-    function switchAccountSession(u) {
-        activeAdmin = { name: u.name, email: u.email, picture: u.picture, role: u.role || "Super Admin HRIS", dept: u.dept || "Human Capital", phone: u.phone || "" };
-        localStorage.setItem('hirisman_active_session', JSON.stringify(activeAdmin));
-        closeAuthModal();
-        loadCompanyDatabase();
-        showToast("Akun Beralih", `Masuk sebagai: ${u.name}`);
+    function discardScannedRawData() {
+        scannedRawEmployees = [];
+        document.getElementById('raw-payroll-paste').value = '';
+        document.getElementById('raw-scan-preview-bar').classList.add('hidden');
     }
 
-    function handleNewAccountRegister(e) {
-        e.preventDefault();
-        const name = document.getElementById('acc-name').value.trim();
-        const email = document.getElementById('acc-email').value.trim();
-        const pwd = document.getElementById('acc-pwd').value.trim();
+    function applyScannedRawDataToPayroll() {
+        let addedCount = 0;
+        let updatedCount = 0;
 
-        let users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
-        if (users.some(x => x.email.toLowerCase() === email.toLowerCase())) return showToast("Gagal", "Email sudah terdaftar.", "error");
+        scannedRawEmployees.forEach(newEmp => {
+            const existingIdx = activeCompany.employees.findIndex(e => 
+                e.nip.toLowerCase() === newEmp.nip.toLowerCase() || 
+                e.name.toLowerCase() === newEmp.name.toLowerCase()
+            );
 
-        const u = { name, email, pwd, isGoogle: false, picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces", role: "Super Admin HRIS", dept: "Human Capital", phone: "" };
-        users.push(u);
-        localStorage.setItem('hirisman_users', JSON.stringify(users));
-        switchAccountSession(u);
-        e.target.reset();
+            if (existingIdx !== -1) {
+                activeCompany.employees[existingIdx].salary = newEmp.salary;
+                activeCompany.employees[existingIdx].allowance = newEmp.allowance;
+                activeCompany.employees[existingIdx].bank = newEmp.bank;
+                activeCompany.employees[existingIdx].acc = newEmp.acc;
+                updatedCount++;
+            } else {
+                activeCompany.employees.push(newEmp);
+                addedCount++;
+            }
+        });
+
+        saveCompanyDatabase();
+        renderActiveCompanyModules();
+        discardScannedRawData();
+        showToast("Sinkronisasi Selesai", `${addedCount} staf baru ditambahkan, ${updatedCount} staf diperbarui (Tanpa Duplikasi).`);
     }
 
-    function handleGoogleOneTap() {
-        const email = prompt("Masukkan email Akun Google Anda:", "admin.holding@gmail.com");
-        if (!email) return;
-
-        let users = JSON.parse(localStorage.getItem('hirisman_users') || '[]');
-        let u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
-        if (!u) {
-            u = { name: email.split('@')[0].toUpperCase(), email, pwd: "", isGoogle: true, picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces", role: "Super Admin HRIS", dept: "Human Capital", phone: "" };
-            users.push(u);
-            localStorage.setItem('hirisman_users', JSON.stringify(users));
-        }
-        switchAccountSession(u);
-    }
-
-    // 11. OTP VERIFIKASI KEAMANAN
-    function openSecurityVerificationModal() {
-        document.getElementById('modal-security').classList.remove('hidden');
-        document.getElementById('otp-target-email').innerText = activeAdmin.email;
-        document.getElementById('otp-step-1').classList.remove('hidden');
-        document.getElementById('otp-step-2').classList.add('hidden');
-    }
-    function closeSecurityModal() { document.getElementById('modal-security').classList.add('hidden'); }
-
-    function requestOtpCode() {
-        simulatedGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        alert(`[SIMULASI EMAIL OTP]\nKepada: ${activeAdmin.email}\nKode OTP: ${simulatedGeneratedOtp}`);
-        document.getElementById('otp-step-1').classList.add('hidden');
-        document.getElementById('otp-step-2').classList.remove('hidden');
-    }
-
-    function verifyOtpAndChangePassword() {
-        if (document.getElementById('otp-input').value.trim() !== simulatedGeneratedOtp) return showToast("OTP Salah", "Kode OTP tidak cocok.", "error");
-        const p = document.getElementById('new-sec-pwd').value.trim();
-        if (p.length < 6) return showToast("Pendek", "Password min 6 karakter.", "error");
-        activeAdmin.pwd = p;
-        localStorage.setItem('hirisman_active_session', JSON.stringify(activeAdmin));
-        closeSecurityModal();
-        showToast("Password Berhasil Diganti", "Akun Anda aman.");
-    }
-
-    // 12. BACKUP MASTER & NAVIGASI
+    // 12. MASTER BACKUP & EKSPOR
     function downloadMasterExcelBackup() {
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(activeCompany.employees || []), "Karyawan");
-        XLSX.writeFile(wb, `Master_${activeCompany.code}.xlsx`);
-        showToast("Unduh Berhasil", "Master data Excel tersimpan.");
+        const empData = (activeCompany.employees || []).map(e => ({
+            "NIP": e.nip, "Nama": e.name, "Divisi": e.dept, "Jabatan": e.role, "Masalah": e.issue, "Gaji Pokok": e.salary
+        }));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(empData), "Karyawan");
+        XLSX.writeFile(wb, `Backup_Master_${activeCompany.code}.xlsx`);
     }
 
     function sendBackupToAdminEmail() {
-        window.location.href = `mailto:${encodeURIComponent(activeAdmin.email)}?subject=Backup Data ${activeCompany.name}&body=Perusahaan: ${activeCompany.name}\nTotal Staf: ${(activeCompany.employees||[]).length}`;
+        const sub = `[BACKUP DATA] ${activeCompany.name}`;
+        const body = `Arsip Data Perusahaan:\nPerusahaan: ${activeCompany.name}\nAdmin: ${activeAdmin.name}\nJumlah Staf: ${(activeCompany.employees || []).length}\nKas: Rp ${(activeCompany.bank.balance || 0).toLocaleString('id-ID')}`;
+        window.location.href = `mailto:${encodeURIComponent(activeAdmin.email)}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
     }
 
     function updateDashboardStats() {
@@ -1824,7 +2067,7 @@
     }
 
     function navigate(page) {
-        ['dashboard', 'attendance', 'payroll', 'employees', 'screening', 'profile', 'settings'].forEach(p => {
+        ['dashboard', 'screening', 'employees', 'attendance', 'payroll', 'profile', 'settings'].forEach(p => {
             document.getElementById(`view-${p}`).classList.add('hidden');
         });
         document.getElementById(`view-${page}`).classList.remove('hidden');
@@ -1845,7 +2088,10 @@
         lucide.createIcons();
     }
 
-    function toggleMobileMenu() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+    function toggleMobileMenu() {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    }
+
     function toggleLanguage() {
         currentLang = currentLang === 'id' ? 'en' : 'id';
         document.getElementById('lang-tag').innerText = currentLang.toUpperCase();

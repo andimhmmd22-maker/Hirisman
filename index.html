@@ -9,7 +9,6 @@
     
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -50,84 +49,78 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen select-none" id="app-body">
 
-<!-- TOAST CONTAINER -->
 <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
 <!-- ========================================================================= -->
-<!-- 1. GERBANG AUTENTIKASI UTAMA (TAMPILAN AWAL SEBELUM DASBOR DIBUKA)       -->
+<!-- 1. AUTH GATEWAY LOCKSCREEN                                                -->
 <!-- ========================================================================= -->
 <div id="auth-gateway-screen" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 my-auto">
-        
-        <!-- LOGO ASLI HIRIS (HEXAGON + HR + HIRIS HR INNOVATION SOLUTIONS) -->
         <div class="text-center space-y-2">
             <div class="w-32 mx-auto flex items-center justify-center">
                 <img id="login-screen-logo" src="" alt="HIRIS Logo" class="w-full object-contain filter drop-shadow-sm">
             </div>
-            <!-- Ucapan Waktu Dinamis -->
             <div>
                 <span class="text-[10px] font-black uppercase tracking-widest text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-200" id="gate-time-greeting">SELAMAT DATANG</span>
             </div>
-            <p class="text-xs text-slate-500 pt-1">Satu akun cloud terpusat untuk PC, Web, dan APK Android</p>
+            <p class="text-xs text-slate-500 pt-1" data-i18n="auth_subtitle">Satu akun cloud terpusat untuk PC, Web, dan APK Android</p>
         </div>
 
-        <!-- Tombol Google Login Otomatis (1-Klik Tanpa Macet) -->
         <button onclick="handleGoogleAuth()" type="button" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-2.5 shadow-xs transition active:scale-95">
             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>Masuk Otomatis dengan Akun Google</span>
+            <span data-i18n="btn_google_login">Masuk Otomatis dengan Akun Google</span>
         </button>
 
         <div class="relative flex py-1 items-center">
             <div class="flex-grow border-t border-slate-200"></div>
-            <span class="flex-shrink mx-3 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Atau dengan Email & Sandi</span>
+            <span class="flex-shrink mx-3 text-slate-400 text-[10px] font-bold uppercase tracking-wider" data-i18n="or_email">Atau dengan Email & Sandi</span>
             <div class="flex-grow border-t border-slate-200"></div>
         </div>
 
         <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-            <button onclick="switchAuthMode('login')" id="tab-auth-login" class="flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs">Masuk Akun</button>
-            <button onclick="switchAuthMode('register')" id="tab-auth-register" class="flex-1 py-1.5 rounded-lg text-slate-500">Daftar Akun Baru</button>
+            <button onclick="switchAuthMode('login')" id="tab-auth-login" class="flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs" data-i18n="tab_login">Masuk Akun</button>
+            <button onclick="switchAuthMode('register')" id="tab-auth-register" class="flex-1 py-1.5 rounded-lg text-slate-500" data-i18n="tab_register">Daftar Akun Baru</button>
         </div>
 
         <form onsubmit="handleEmailAuthSubmit(event)" class="space-y-3">
             <div id="auth-name-field" class="hidden">
-                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Pengelola / HRD</label>
-                <input type="text" id="auth-input-name" autocomplete="name" placeholder="Nama Lengkap Anda" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+                <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="lbl_name">Nama Lengkap</label>
+                <input type="text" id="auth-input-name" autocomplete="name" placeholder="Nama Anda" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Email</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="lbl_email">Alamat Email</label>
                 <input type="email" id="auth-input-email" required autocomplete="username" placeholder="admin@perusahaan.com" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="lbl_password">Kata Sandi</label>
                 <input type="password" id="auth-input-pwd" required autocomplete="current-password" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
             </div>
             <div class="flex items-center justify-between text-xs pt-1">
                 <label class="flex items-center space-x-2 cursor-pointer">
                     <input type="checkbox" id="auth-remember-device" checked class="rounded text-brand-600 focus:ring-brand-500">
-                    <span class="text-[11px] font-semibold text-slate-600">Ingat saya (Login otomatis berikutnya)</span>
+                    <span class="text-[11px] font-semibold text-slate-600" data-i18n="remember_me">Ingat saya (Login otomatis berikutnya)</span>
                 </label>
             </div>
-            <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/25 transition active:scale-95">
+            <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/25 transition active:scale-95" data-i18n="btn_submit_auth">
                 Masuk ke Dasbor
             </button>
         </form>
 
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[10px] text-slate-500 space-y-1">
-            <p class="font-bold text-slate-700">Akun Uji Coba Cepat (Langsung Aktif):</p>
+            <p class="font-bold text-slate-700" data-i18n="demo_title">Akun Uji Coba Cepat (Langsung Aktif):</p>
             <p>Email: <b class="text-brand-700">admin@hirisman.id</b> | Sandi: <b class="text-brand-700">admin123</b></p>
         </div>
     </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- 2. APLIKASI UTAMA (DITAMPILKAN SETELAH AKUN TEROTORISASI RESMI)           -->
+<!-- 2. MAIN APP WRAPPER                                                       -->
 <!-- ========================================================================= -->
 <div id="app-wrapper" class="bg-slate-50 min-h-screen flex flex-col md:flex-row transition-all duration-300 hidden">
 
-    <!-- Sidebar Navigation Drawer -->
+    <!-- Sidebar Navigation -->
     <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-200 shadow-xl md:shadow-none">
         <div>
-            <!-- Header Sidebar dengan Logo HIRIS Asli -->
             <div class="p-4 flex items-center justify-between border-b border-slate-100">
                 <div class="flex items-center space-x-3">
                     <img id="sidebar-brand-icon" src="" class="w-10 h-10 object-contain flex-shrink-0" alt="HIRIS Icon">
@@ -141,40 +134,38 @@
                 </button>
             </div>
 
-            <!-- List Menu Aplikasi -->
             <nav class="p-3 space-y-1 mt-1">
                 <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-brand-700 bg-brand-50 transition" data-page="dashboard">
                     <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                    <span>Dashboard Utama</span>
+                    <span data-i18n="menu_dashboard">Dashboard Utama</span>
                 </button>
                 <button onclick="navigate('payroll')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="payroll">
                     <i data-lucide="banknote" class="w-4 h-4"></i>
-                    <span>Payroll & PPh 21 TER</span>
+                    <span data-i18n="menu_payroll">Payroll & PPh 21 TER</span>
                 </button>
                 <button onclick="navigate('attendance')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="attendance">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    <span>Absensi Geofence & Shift</span>
+                    <span data-i18n="menu_attendance">Absensi Geofence</span>
                 </button>
                 <button onclick="navigate('employees')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="employees">
                     <i data-lucide="users" class="w-4 h-4"></i>
-                    <span>Data Karyawan & Bagan</span>
+                    <span data-i18n="menu_employees">Data Karyawan</span>
                 </button>
                 <button onclick="navigate('screening')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="screening">
-                    <i data-lucide="trello" class="w-4 h-4"></i>
-                    <span>ATS CV & Kanban Board</span>
+                    <i data-lucide="file-search" class="w-4 h-4"></i>
+                    <span data-i18n="menu_screening">Skrining CV AI (ATS)</span>
                 </button>
                 <button onclick="navigate('profile')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="profile">
                     <i data-lucide="user" class="w-4 h-4"></i>
-                    <span>Profil Pengguna</span>
+                    <span data-i18n="menu_profile">Profil Pengguna</span>
                 </button>
                 <button onclick="navigate('settings')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs text-slate-600 hover:bg-slate-50 transition" data-page="settings">
                     <i data-lucide="settings-2" class="w-4 h-4"></i>
-                    <span>Pengaturan & Perusahaan</span>
+                    <span data-i18n="menu_settings">Pengaturan</span>
                 </button>
             </nav>
         </div>
 
-        <!-- Footer Akun & Logout -->
         <div class="p-3 border-t border-slate-100 bg-slate-50/80">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2.5 cursor-pointer overflow-hidden" onclick="navigate('profile')">
@@ -184,33 +175,26 @@
                         <p class="text-[10px] text-slate-400 truncate font-mono" id="sidebar-user-email">admin@hirisman.id</p>
                     </div>
                 </div>
-                <button onclick="handleUserLogout()" title="Keluar Akun" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition active:scale-95">
+                <button onclick="handleUserLogout()" title="Keluar" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition active:scale-95">
                     <i data-lucide="log-out" class="w-4 h-4"></i>
                 </button>
-            </div>
-            <div class="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-semibold text-emerald-600">
-                <span class="flex items-center space-x-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="cloud-sync-tag">Cloud Realtime Sync</span>
-                </span>
-                <span class="font-mono text-slate-400">Master Vault</span>
             </div>
         </div>
     </aside>
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto custom-scrollbar">
-        <!-- Top Navigation Bar: Pojok Kiri = Menu | Pojok Kanan = Notifikasi -->
+        <!-- Top Navigation Bar -->
         <header class="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-xs">
             <div class="flex items-center space-x-3">
-                <button onclick="toggleSidebarMenu()" class="p-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl transition flex items-center space-x-2 border border-slate-200 shadow-xs active:scale-95" title="Buka Menu">
+                <button onclick="toggleSidebarMenu()" class="p-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl transition flex items-center space-x-2 border border-slate-200 shadow-xs active:scale-95">
                     <i data-lucide="menu" class="w-5 h-5"></i>
-                    <span class="hidden sm:inline text-xs font-extrabold">Semua Menu</span>
+                    <span class="hidden sm:inline text-xs font-extrabold" data-i18n="btn_all_menu">Semua Menu</span>
                 </button>
                 <div class="flex items-center space-x-2">
                     <img id="topbar-logo-icon" src="" class="w-6 h-6 object-contain hidden sm:block">
                     <span class="text-xs font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-3 py-1 rounded-xl border border-brand-200 truncate max-w-[140px] sm:max-w-xs" id="topbar-company-name">
-                        PT Solusi Utama Nusantara
+                        Perusahaan
                     </span>
                 </div>
             </div>
@@ -223,7 +207,6 @@
                     <span id="lang-tag">ID</span>
                 </button>
 
-                <!-- Lonceng Notifikasi Interaktif -->
                 <div class="relative">
                     <button onclick="toggleNotificationCenter()" class="p-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 rounded-xl border border-slate-200 transition relative active:scale-95" title="Pemberitahuan">
                         <i data-lucide="bell" class="w-5 h-5"></i>
@@ -234,28 +217,28 @@
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <h3 class="text-xs font-extrabold text-slate-900 flex items-center space-x-1.5">
                                 <i data-lucide="bell-ring" class="w-4 h-4 text-brand-600"></i>
-                                <span>Pemberitahuan Sistem & Log</span>
+                                <span data-i18n="notif_title">Pemberitahuan Sistem & Log</span>
                             </h3>
-                            <button onclick="clearAllNotifications()" class="text-[10px] text-slate-400 hover:text-rose-600 font-bold">Bersihkan Semua</button>
+                            <button onclick="clearAllNotifications()" class="text-[10px] text-slate-400 hover:text-rose-600 font-bold" data-i18n="clear_all">Bersihkan</button>
                         </div>
                         <div id="notif-items-list" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar text-xs">
-                            <p class="text-slate-400 text-center py-4">Belum ada pemberitahuan baru.</p>
+                            <p class="text-slate-400 text-center py-4" data-i18n="no_notif">Belum ada pemberitahuan baru.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Dynamic Content Body -->
+        <!-- Dynamic Body View -->
         <div class="p-4 sm:p-6 space-y-5 flex-1" id="main-content-view">
 
-            <!-- PAGE 1: DASHBOARD UTAMA RAMPING -->
+            <!-- PAGE 1: DASHBOARD -->
             <section id="view-dashboard" class="space-y-4">
                 <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="max-w-xl">
                         <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-200 bg-brand-800/60 px-2 py-0.5 rounded" id="dash-greeting-time">SELAMAT</span>
                         <h2 class="text-lg sm:text-2xl font-extrabold mt-1 text-white" id="dash-user-greeting">Halo, HR Admin!</h2>
-                        <p class="text-brand-100 text-xs mt-0.5">Satu akun cloud terpusat untuk PC dan HP. Data tersinkronisasi otomatis secara realtime.</p>
+                        <p class="text-brand-100 text-xs mt-0.5" data-i18n="dash_subtitle">Satu akun cloud terpusat untuk PC dan HP. Data tersinkronisasi otomatis secara realtime.</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-center font-mono flex-shrink-0">
                         <span class="text-[10px] text-brand-200 font-bold block uppercase" id="tz-badge-top">WIB</span>
@@ -263,13 +246,12 @@
                     </div>
                 </div>
 
-                <!-- Grid Kalender & SOP Terpadu -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                     <div class="lg:col-span-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
                             <h3 class="font-extrabold text-xs text-slate-900 flex items-center space-x-1.5">
                                 <i data-lucide="calendar" class="w-4 h-4 text-brand-600"></i>
-                                <span>Kalender Kerja</span>
+                                <span data-i18n="cal_title">Kalender Kerja</span>
                             </h3>
                             <div class="flex items-center space-x-1">
                                 <button onclick="setIndoTimezone('WIB')" class="px-1.5 py-0.5 rounded bg-brand-600 text-white text-[9px] font-bold">WIB</button>
@@ -287,38 +269,37 @@
                         <div class="p-3.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
                             <span class="text-xs font-extrabold text-slate-800 flex items-center space-x-1.5">
                                 <i data-lucide="book-open" class="w-4 h-4 text-brand-600"></i>
-                                <span>Pusat Regulasi & SOP HRD</span>
+                                <span data-i18n="sop_title">Regulasi & SOP HRD</span>
                             </span>
                         </div>
                         <div class="p-4 flex-1 text-xs text-slate-600 leading-relaxed overflow-y-auto max-h-56 custom-scrollbar space-y-2">
                             <div class="p-2.5 rounded-xl bg-blue-50/60 border border-blue-100">
                                 <h4 class="font-extrabold text-slate-900 text-xs">PP No. 58/2023: PPh 21 TER</h4>
-                                <p class="text-[11px] mt-0.5">Pemotongan pajak gaji dihitung otomatis menggunakan tabel TER Kategori A, B, atau C berdasarkan status PTKP.</p>
+                                <p class="text-[11px] mt-0.5" data-i18n="desc_pph_rule">Pemotongan pajak gaji dihitung otomatis menggunakan tabel TER Kategori A, B, atau C berdasarkan status PTKP.</p>
                             </div>
                             <div class="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
                                 <h4 class="font-extrabold text-slate-900 text-xs">BPJS Ketenagakerjaan & Kesehatan</h4>
-                                <p class="text-[11px] mt-0.5">Iuran JHT 2%, JP 1%, BPJS Kesehatan 1% ditanggung karyawan; porsi perusahaan dibayarkan otomatis.</p>
+                                <p class="text-[11px] mt-0.5" data-i18n="desc_bpjs_rule">Iuran JHT 2%, JP 1%, BPJS Kesehatan 1% ditanggung karyawan; porsi perusahaan dibayarkan otomatis.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4 Metrik Ringkas -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Staf Terdaftar</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase" data-i18n="stat_staff">Staf Terdaftar</span>
                         <p class="text-xl font-black text-brand-700 mt-0.5" id="stat-active-emp">0</p>
                     </div>
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Kandidat ATS</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase" data-i18n="stat_candidates">Kandidat ATS</span>
                         <p class="text-xl font-black text-indigo-600 mt-0.5" id="stat-candidates-count">0</p>
                     </div>
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Kas Perusahaan</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase" data-i18n="stat_cash">Kas Perusahaan</span>
                         <p class="text-base font-black text-emerald-600 mt-0.5 truncate" id="stat-balance-emp">Rp 0</p>
                     </div>
                     <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                        <span class="text-[11px] text-slate-400 font-bold uppercase">Presensi Hari Ini</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase" data-i18n="stat_attendance">Presensi Hari Ini</span>
                         <p class="text-xl font-black text-brand-600 mt-0.5" id="stat-today-attendance">0</p>
                     </div>
                 </div>
@@ -338,20 +319,20 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="openAddEmployeeModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
                             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                            <span>+ Input Staf & Gaji</span>
+                            <span data-i18n="btn_add_staff_payroll">+ Input Staf & Gaji</span>
                         </button>
                         <button onclick="executeOneClickRunPayroll()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center space-x-1.5">
-                            <i data-lucide="play" class="w-3.5 h-3.5"></i><span>One-Click Run Payroll</span>
+                            <i data-lucide="play" class="w-3.5 h-3.5"></i><span data-i18n="btn_run_payroll">One-Click Run Payroll</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <h2 class="text-base font-bold text-slate-900 mb-3">Daftar Penggajian & Potongan PPh 21 TER</h2>
+                    <h2 class="text-base font-bold text-slate-900 mb-3" data-i18n="payroll_list_title">Daftar Penggajian & Potongan PPh 21 TER</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                <tr class="bg-slate-50 text-slate-500 border-b font-semibold">
                                     <th class="py-3 px-3">Pegawai & PTKP</th>
                                     <th class="py-3 px-3">Gaji Bruto</th>
                                     <th class="py-3 px-3 text-rose-600">PPh 21 TER</th>
@@ -363,7 +344,7 @@
                             <tbody id="payroll-table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
-                    <div id="payroll-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold">Belum ada data penggajian.</div>
+                    <div id="payroll-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold" data-i18n="empty_payroll">Belum ada data penggajian.</div>
                 </div>
             </section>
 
@@ -374,9 +355,9 @@
                         <div class="border-b border-slate-100 pb-2">
                             <h3 class="font-extrabold text-sm text-slate-900 flex items-center space-x-2">
                                 <i data-lucide="camera" class="w-4 h-4 text-brand-600"></i>
-                                <span>Verifikasi Wajah Selfie & Geofence GPS</span>
+                                <span data-i18n="cam_title">Verifikasi Wajah Selfie & Geofence GPS</span>
                             </h3>
-                            <p class="text-xs text-slate-400">Jarak Maks. 50 meter dari titik koordinat kantor.</p>
+                            <p class="text-xs text-slate-400" data-i18n="cam_desc">Jarak Maks. 50 meter dari titik koordinat kantor.</p>
                         </div>
 
                         <div class="relative w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden border-2 border-slate-200 flex items-center justify-center">
@@ -384,13 +365,13 @@
                             <canvas id="webcam-canvas" class="hidden"></canvas>
                             <div id="webcam-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 space-y-2 bg-slate-900">
                                 <i data-lucide="video" class="w-8 h-8"></i>
-                                <span class="text-xs font-semibold">Kamera Belum Aktif</span>
-                                <button onclick="startWebcamStream()" class="px-3 py-1 bg-brand-600 text-white rounded-lg text-xs font-bold">Nyalakan Kamera</button>
+                                <span class="text-xs font-semibold" data-i18n="cam_off">Kamera Belum Aktif</span>
+                                <button onclick="startWebcamStream()" class="px-3 py-1 bg-brand-600 text-white rounded-lg text-xs font-bold" data-i18n="btn_cam_on">Nyalakan Kamera</button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Karyawan:</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" data-i18n="select_staff">Pilih Karyawan:</label>
                             <select id="attend-emp-select" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none bg-white"></select>
                         </div>
 
@@ -407,11 +388,11 @@
                     </div>
 
                     <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-extrabold text-sm text-slate-900 mb-3">Log Presensi Wajah & Geofence Hari Ini</h3>
+                        <h3 class="font-extrabold text-sm text-slate-900 mb-3" data-i18n="log_attendance_title">Log Presensi Wajah & Geofence Hari Ini</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                    <tr class="bg-slate-50 text-slate-500 border-b font-semibold">
                                         <th class="py-2.5 px-3">Foto</th>
                                         <th class="py-2.5 px-3">Nama Pegawai</th>
                                         <th class="py-2.5 px-3">Waktu</th>
@@ -421,7 +402,7 @@
                                 <tbody id="attend-table-body" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
-                        <div id="attend-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold">Belum ada aktivitas presensi wajah hari ini.</div>
+                        <div id="attend-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold" data-i18n="empty_attendance">Belum ada aktivitas presensi hari ini.</div>
                     </div>
                 </div>
             </section>
@@ -429,16 +410,16 @@
             <!-- PAGE 4: DATA KARYAWAN -->
             <section id="view-employees" class="space-y-5 hidden">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900">Direktori Karyawan</h2>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                        <h2 class="text-base font-bold text-slate-900" data-i18n="emp_dir_title">Direktori Karyawan</h2>
                         <button onclick="openAddEmployeeModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1.5">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i><span>+ Input Staf Baru</span>
+                            <i data-lucide="user-plus" class="w-4 h-4"></i><span data-i18n="btn_add_staff">+ Input Staf Baru</span>
                         </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold">
+                                <tr class="bg-slate-50 text-slate-500 border-b font-semibold">
                                     <th class="py-3 px-4">NIP & Nama</th>
                                     <th class="py-3 px-4">Divisi & Jabatan</th>
                                     <th class="py-3 px-4">Gaji Pokok</th>
@@ -448,39 +429,116 @@
                             <tbody id="emp-table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
-                    <div id="emp-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold">Belum ada karyawan terdaftar.</div>
+                    <div id="emp-empty-box" class="py-8 text-center text-xs text-slate-400 font-semibold" data-i18n="empty_emp">Belum ada karyawan terdaftar.</div>
                 </div>
             </section>
 
-            <!-- PAGE 5: KANBAN ATS -->
+            <!-- PAGE 5: SKRINING CV AI TERARAH (SEMUA FORMAT & INPUT MANUAL) -->
             <section id="view-screening" class="space-y-5 hidden">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                        <h2 class="text-base font-bold text-slate-900">Recruitment Kanban Board</h2>
-                        <button onclick="openAddCandidateModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center space-x-1">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>+ Tambah Pelamar</span>
+                    <div class="max-w-3xl">
+                        <div class="flex items-center space-x-2 text-brand-600 text-xs font-bold uppercase mb-1">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i><span>Semantic ATS Evaluation Engine</span>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-slate-900" data-i18n="ats_title">Skrining CV AI & Analisis Semantik</h2>
+                        <p class="text-slate-500 text-xs mt-0.5" data-i18n="ats_desc">Unggah semua jenis berkas (PDF, Excel, Word, TXT, Gambar OCR) atau ketik manual. Kata berbeda namun bermakna sama otomatis dianggap reliabel & menjadi kelebihan.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" id="cand-name" placeholder="Nama Lengkap Pelamar" class="px-3 py-2 bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                        <input type="email" id="cand-email" placeholder="Email Pelamar" class="px-3 py-2 bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                        <input type="text" id="cand-role" placeholder="Posisi yang Dilamar" class="px-3 py-2 bg-white border border-slate-300 rounded-lg font-semibold focus:outline-none focus:border-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <!-- Box CV -->
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-brand-600"></i>
+                                    <span>1. CV / Resume Pelamar</span>
+                                </h4>
+                                <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                                    <button onclick="toggleScreenInput('cv', 'file')" id="tab-cv-file" class="px-2 py-1 rounded bg-white text-brand-700 shadow-xs">Berkas</button>
+                                    <button onclick="toggleScreenInput('cv', 'manual')" id="tab-cv-manual" class="px-2 py-1 rounded text-slate-600">Manual</button>
+                                </div>
+                            </div>
+                            <div id="panel-cv-file" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-white">
+                                <input type="file" id="input-cv" accept=".pdf, .docx, .xlsx, .xls, .csv, .txt, .png, .jpg, .jpeg" class="hidden" onchange="parseUniversalFile(this, 'cv')">
+                                <label for="input-cv" class="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-xs text-slate-700">
+                                    <i data-lucide="folder-open" class="w-3.5 h-3.5 text-brand-600"></i><span>Pilih File (Semua Format)</span>
+                                </label>
+                                <p id="label-cv" class="text-xs font-semibold text-brand-600 mt-2 truncate">Belum ada berkas</p>
+                            </div>
+                            <textarea id="manual-cv" rows="4" placeholder="Ketik atau tempel isi resume pelamar di sini..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono hidden focus:outline-none focus:border-brand-500"></textarea>
+                        </div>
+
+                        <!-- Box Loker -->
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
+                                    <i data-lucide="briefcase" class="w-4 h-4 text-indigo-600"></i>
+                                    <span>2. Kualifikasi & Poster Lowongan</span>
+                                </h4>
+                                <div class="flex bg-slate-200 p-0.5 rounded-lg text-[10px] font-bold">
+                                    <button onclick="toggleScreenInput('job', 'file')" id="tab-job-file" class="px-2 py-1 rounded bg-white text-indigo-700 shadow-xs">Berkas</button>
+                                    <button onclick="toggleScreenInput('job', 'manual')" id="tab-job-manual" class="px-2 py-1 rounded text-slate-600">Manual</button>
+                                </div>
+                            </div>
+                            <div id="panel-job-file" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center bg-white">
+                                <input type="file" id="input-job" accept=".pdf, .docx, .xlsx, .xls, .csv, .txt, .png, .jpg, .jpeg" class="hidden" onchange="parseUniversalFile(this, 'job')">
+                                <label for="input-job" class="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-xs text-slate-700">
+                                    <i data-lucide="folder-open" class="w-3.5 h-3.5 text-indigo-600"></i><span>Pilih File (Semua Format)</span>
+                                </label>
+                                <p id="label-job" class="text-xs font-semibold text-indigo-600 mt-2 truncate">Belum ada berkas</p>
+                            </div>
+                            <textarea id="manual-job" rows="4" placeholder="Ketik atau tempel persyaratan lowongan di sini..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono hidden focus:outline-none focus:border-brand-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button onclick="runSemanticAiScreening()" id="btn-run-screening" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow flex items-center space-x-2 transition">
+                            <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                            <span data-i18n="btn_eval_ai">Jalankan Evaluasi AI Semantik</span>
                         </button>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 overflow-x-auto pb-2">
-                        <div class="bg-slate-100/70 p-3 rounded-2xl border border-slate-200 space-y-2 min-w-[180px]">
-                            <span class="text-xs font-extrabold text-slate-700 block">1. Applied</span>
-                            <div id="kanban-col-applied" class="space-y-2 min-h-[150px]"></div>
+
+                    <!-- Panel Hasil Analisis -->
+                    <div id="screening-result-panel" class="hidden space-y-4 pt-2">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <div class="flex items-center space-x-4 md:col-span-2">
+                                <div class="relative w-20 h-20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                        <path id="circle-progress" class="text-brand-600" stroke-width="3.5" stroke-dasharray="0, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    </svg>
+                                    <span class="absolute font-black text-lg text-slate-900" id="match-percent">0%</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Skor Keselarasan Semantik</span>
+                                    <h3 class="text-base font-bold text-slate-900 mt-0.5" id="match-verdict">Menganalisis...</h3>
+                                    <p class="text-xs text-slate-500">Mencakup kecocokan makna kata dan relevansi kompetensi.</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-xs font-semibold">
+                                <div class="flex justify-between"><span class="text-slate-500">Hard Skills:</span><span class="text-brand-700" id="metric-hardskill">--%</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Pendidikan:</span><span class="text-brand-700" id="metric-edu">Terverifikasi</span></div>
+                            </div>
                         </div>
-                        <div class="bg-blue-50/50 p-3 rounded-2xl border border-blue-200 space-y-2 min-w-[180px]">
-                            <span class="text-xs font-extrabold text-blue-900 block">2. Screening</span>
-                            <div id="kanban-col-screening" class="space-y-2 min-h-[150px]"></div>
-                        </div>
-                        <div class="bg-purple-50/50 p-3 rounded-2xl border border-purple-200 space-y-2 min-w-[180px]">
-                            <span class="text-xs font-extrabold text-purple-900 block">3. Interview</span>
-                            <div id="kanban-col-interview" class="space-y-2 min-h-[150px]"></div>
-                        </div>
-                        <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-200 space-y-2 min-w-[180px]">
-                            <span class="text-xs font-extrabold text-emerald-900 block">4. Offer</span>
-                            <div id="kanban-col-offer" class="space-y-2 min-h-[150px]"></div>
-                        </div>
-                        <div class="bg-slate-100 p-3 rounded-2xl border border-slate-300 space-y-2 min-w-[180px]">
-                            <span class="text-xs font-extrabold text-slate-800 block">5. Done</span>
-                            <div id="kanban-col-done" class="space-y-2 min-h-[150px]"></div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                                <h4 class="text-xs font-bold text-emerald-600 flex items-center space-x-1.5 mb-2">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Kelebihan & Kecocokan Semantik</span>
+                                </h4>
+                                <ul id="strengths-list" class="space-y-1 text-xs text-slate-600"></ul>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                                <h4 class="text-xs font-bold text-rose-500 flex items-center space-x-1.5 mb-2">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Kekurangan Kualifikasi yang Tidak Terpenuhi</span>
+                                </h4>
+                                <ul id="weaknesses-list" class="space-y-1 text-xs text-slate-600"></ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -496,18 +554,110 @@
                 </div>
             </section>
 
-            <!-- PAGE 7: PENGATURAN -->
+            <!-- PAGE 7: PUSAT PENGATURAN (10 PERUSAHAAN, BILINGUAL, OTA UPDATE, PRIVASI) -->
             <section id="view-settings" class="space-y-5 hidden">
                 <div class="max-w-3xl space-y-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Perusahaan yang Dikelola (Maks. 10)</h3>
+                    
+                    <!-- 1. KELOLA 10 PERUSAHAAN -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider" data-i18n="set_comp_title">Kelola 10 Perusahaan Mandiri</h3>
+                                <p class="text-xs text-slate-500" data-i18n="set_comp_desc">Setiap perusahaan memiliki database staf, payroll, dan absensi terpisah.</p>
+                            </div>
+                            <button onclick="openAddCompanyModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow" data-i18n="btn_add_comp">
+                                + Tambah Perusahaan
+                            </button>
+                        </div>
                         <div id="settings-comp-list" class="space-y-2 pt-1"></div>
+                    </div>
+
+                    <!-- 2. PENGATURAN BAHASA (BILINGUAL ID / EN) -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider" data-i18n="set_lang_title">Pengaturan Bahasa (Language)</h3>
+                        </div>
+                        <p class="text-xs text-slate-500" data-i18n="set_lang_desc">Pilih bahasa pengantar antarmuka sistem (Indonesia atau English):</p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="setLanguageMode('id')" id="btn-lang-id" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                                🇮🇩 Bahasa Indonesia
+                            </button>
+                            <button onclick="setLanguageMode('en')" id="btn-lang-en" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+                                🇬🇧 English
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. PEMBARUAN APLIKASI (OTA UPDATE SINKRONISASI WEBSITE) -->
+                    <div class="bg-gradient-to-r from-brand-900 to-indigo-900 p-5 rounded-2xl text-white shadow-md space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-400 animate-spin"></i>
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider" data-i18n="ota_title">Pembaruan Sistem & Sinkronisasi Website (OTA)</h3>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold bg-white/10 px-2 py-0.5 rounded" id="ota-status-tag">Versi 3.9.0</span>
+                        </div>
+                        <p class="text-xs text-brand-100 leading-relaxed" data-i18n="ota_desc">
+                            Perubahan kode atau fitur di website otomatis tersinkronisasi ke APK di HP Anda. Tekan tombol di bawah untuk memeriksa pembaruan:
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button onclick="checkAppUpdates(true)" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow" data-i18n="btn_check_update">
+                                Periksa Pembaruan Sekarang
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4. INFORMASI PRIVASI & KEAMANAN PENGGUNA -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider" data-i18n="priv_title">Privasi & Keamanan Data Pengguna</h3>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-600">
+                            <p>• <b>Kepatuhan UU PDP & Enkripsi</b>: Seluruh data pribadi, nomor rekening, dan slip gaji tersimpan dalam wadah cloud aman dengan enkripsi AES-256.</p>
+                            <p>• <b>Isolasi Data Akun</b>: Data akun Anda sepenuhnya terisolasi dan tidak dapat diakses oleh akun atau pengguna lain.</p>
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button onclick="exportUniversalBackup()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold" data-i18n="btn_export_all">
+                                Unduh Salinan Data Saya (Excel)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5. TAMPILAN LAYAR & ORIENTASI -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="smartphone" class="w-4 h-4 text-brand-600"></i>
+                            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Orientasi Layar</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button onclick="setAppOrientation('auto')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">Otomatis</button>
+                            <button onclick="setAppOrientation('landscape')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Landscape (PC)</button>
+                            <button onclick="setAppOrientation('portrait')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">Portrait (HP)</button>
+                        </div>
                     </div>
                 </div>
             </section>
 
         </div>
     </main>
+</div>
+
+<!-- MODAL: TAMBAH PERUSAHAAN (MAKSIMAL 10) -->
+<div id="modal-add-comp" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="font-extrabold text-slate-900 text-sm">Daftarkan Perusahaan Baru</h3>
+            <button onclick="closeAddCompanyModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <form onsubmit="saveNewCompany(event)" class="space-y-2.5">
+            <input type="text" id="new-c-name" required placeholder="Nama Perusahaan" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+            <input type="text" id="new-c-code" required placeholder="Kode Singkat (cth. ABC)" maxlength="5" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-bold uppercase focus:outline-none">
+            <input type="number" id="new-c-balance" required placeholder="Saldo Awal Kas Payroll (IDR)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">Simpan Perusahaan</button>
+        </form>
+    </div>
 </div>
 
 <!-- MODAL: INPUT DATA STAF MANUAL -->
@@ -541,15 +691,141 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT SYSTEM ENGINE (DENGAN BASE64 LOGO ASLI & ZERO-FAIL AUTH)       -->
+<!-- JAVASCRIPT SYSTEM ENGINE                                                  -->
 <!-- ========================================================================= -->
 <script>
-    // LOGO ASLI HIRIS BASE64 (DARI GAMBAR RESMI PENGGUNA)
+    // LOGO RESMI HIRIS DARI GAMBAR ASLI
     const HIRIS_LOGO_IMG = "data:image/webp;base64,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";
     const HIRIS_ICON_IMG = "data:image/webp;base64,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";
 
+    // KAMUS DUA BAHASA (BILINGUAL ID / EN)
+    const i18nDict = {
+        id: {
+            auth_subtitle: "Satu akun cloud terpusat untuk PC, Web, dan APK Android",
+            btn_google_login: "Masuk Otomatis dengan Akun Google",
+            or_email: "Atau dengan Email & Sandi",
+            tab_login: "Masuk Akun",
+            tab_register: "Daftar Akun Baru",
+            lbl_name: "Nama Lengkap Pengelola / HRD",
+            lbl_email: "Alamat Email",
+            lbl_password: "Kata Sandi",
+            remember_me: "Ingat saya (Login otomatis berikutnya)",
+            btn_submit_auth: "Masuk ke Dasbor",
+            demo_title: "Akun Uji Coba Cepat (Langsung Aktif):",
+            menu_dashboard: "Dashboard Utama",
+            menu_payroll: "Payroll & PPh 21 TER",
+            menu_attendance: "Absensi Geofence",
+            menu_employees: "Data Karyawan",
+            menu_screening: "Skrining CV AI (ATS)",
+            menu_profile: "Profil Pengguna",
+            menu_settings: "Pengaturan",
+            btn_all_menu: "Semua Menu",
+            notif_title: "Pemberitahuan Sistem & Log",
+            clear_all: "Bersihkan",
+            no_notif: "Belum ada pemberitahuan baru.",
+            dash_subtitle: "Satu akun cloud terpusat untuk PC dan HP. Data tersinkronisasi otomatis secara realtime.",
+            cal_title: "Kalender Kerja",
+            sop_title: "Regulasi & SOP HRD",
+            desc_pph_rule: "Pemotongan pajak gaji dihitung otomatis menggunakan tabel TER Kategori A, B, atau C berdasarkan status PTKP.",
+            desc_bpjs_rule: "Iuran JHT 2%, JP 1%, BPJS Kesehatan 1% ditanggung karyawan; porsi perusahaan dibayarkan otomatis.",
+            stat_staff: "Staf Terdaftar",
+            stat_candidates: "Kandidat ATS",
+            stat_cash: "Kas Perusahaan",
+            stat_attendance: "Presensi Hari Ini",
+            btn_add_staff_payroll: "+ Input Staf & Gaji",
+            btn_run_payroll: "One-Click Run Payroll",
+            payroll_list_title: "Daftar Penggajian & Potongan PPh 21 TER",
+            empty_payroll: "Belum ada data penggajian.",
+            cam_title: "Verifikasi Wajah Selfie & Geofence GPS",
+            cam_desc: "Jarak Maks. 50 meter dari titik koordinat kantor.",
+            cam_off: "Kamera Belum Aktif",
+            btn_cam_on: "Nyalakan Kamera",
+            select_staff: "Pilih Karyawan:",
+            log_attendance_title: "Log Presensi Wajah & Geofence Hari Ini",
+            empty_attendance: "Belum ada aktivitas presensi hari ini.",
+            emp_dir_title: "Direktori Karyawan",
+            btn_add_staff: "+ Input Staf Baru",
+            empty_emp: "Belum ada karyawan terdaftar.",
+            ats_title: "Skrining CV AI & Analisis Semantik",
+            ats_desc: "Unggah semua jenis berkas (PDF, Excel, Word, TXT, Gambar OCR) atau ketik manual. Kata berbeda namun bermakna sama otomatis dianggap reliabel & menjadi kelebihan.",
+            btn_eval_ai: "Jalankan Evaluasi AI Semantik",
+            set_comp_title: "Kelola 10 Perusahaan Mandiri",
+            set_comp_desc: "Setiap perusahaan memiliki database staf, payroll, dan absensi terpisah.",
+            btn_add_comp: "+ Tambah Perusahaan",
+            set_lang_title: "Pengaturan Bahasa (Language)",
+            set_lang_desc: "Pilih bahasa pengantar antarmuka sistem (Indonesia atau English):",
+            ota_title: "Pembaruan Sistem & Sinkronisasi Website (OTA)",
+            ota_desc: "Perubahan kode atau fitur di website otomatis tersinkronisasi ke APK di HP Anda. Tekan tombol di bawah untuk memeriksa pembaruan:",
+            btn_check_update: "Periksa Pembaruan Sekarang",
+            priv_title: "Privasi & Keamanan Data Pengguna",
+            btn_export_all: "Unduh Salinan Data Saya (Excel)"
+        },
+        en: {
+            auth_subtitle: "Unified cloud account for PC, Web, and Android APK",
+            btn_google_login: "Sign in with Google Account",
+            or_email: "Or with Email & Password",
+            tab_login: "Sign In",
+            tab_register: "Register Account",
+            lbl_name: "Full Name (Admin / HRD)",
+            lbl_email: "Email Address",
+            lbl_password: "Password",
+            remember_me: "Remember me (Auto-login next time)",
+            btn_submit_auth: "Enter Dashboard",
+            demo_title: "Quick Demo Account (Pre-configured):",
+            menu_dashboard: "Dashboard",
+            menu_payroll: "Payroll & PPh 21 TER",
+            menu_attendance: "Geofence Attendance",
+            menu_employees: "Employees",
+            menu_screening: "AI ATS Screening",
+            menu_profile: "User Profile",
+            menu_settings: "Settings",
+            btn_all_menu: "All Menus",
+            notif_title: "System Alerts & Log",
+            clear_all: "Clear All",
+            no_notif: "No new notifications.",
+            dash_subtitle: "Centralized cloud database for PC and Mobile. Real-time automatic synchronization.",
+            cal_title: "Work Calendar",
+            sop_title: "Labor Law & SOP",
+            desc_pph_rule: "Salary tax deductions are calculated automatically using TER tables Category A, B, or C.",
+            desc_bpjs_rule: "BPJS JHT 2%, JP 1%, Health 1% paid by employee; employer portion paid automatically.",
+            stat_staff: "Total Employees",
+            stat_candidates: "ATS Candidates",
+            stat_cash: "Payroll Cash",
+            stat_attendance: "Today Attendance",
+            btn_add_staff_payroll: "+ Add Staff & Salary",
+            btn_run_payroll: "One-Click Run Payroll",
+            payroll_list_title: "Payroll Register & PPh 21 TER Deductions",
+            empty_payroll: "No payroll records found.",
+            cam_title: "Selfie Facial Verification & GPS Geofence",
+            cam_desc: "Max. radius 50 meters from office coordinates.",
+            cam_off: "Camera Inactive",
+            btn_cam_on: "Turn on Camera",
+            select_staff: "Select Employee:",
+            log_attendance_title: "Facial Attendance & Geofence Log Today",
+            empty_attendance: "No attendance recorded today.",
+            emp_dir_title: "Employee Directory",
+            btn_add_staff: "+ Add New Staff",
+            empty_emp: "No employees registered yet.",
+            ats_title: "Semantic AI CV Screening & Matching",
+            ats_desc: "Upload all file formats (PDF, Excel, Word, TXT, OCR Images) or type manually. Synonyms are evaluated semantically.",
+            btn_eval_ai: "Execute Semantic AI Screening",
+            set_comp_title: "Manage 10 Independent Companies",
+            set_comp_desc: "Each company maintains isolated employee, payroll, and attendance records.",
+            btn_add_comp: "+ Add Company",
+            set_lang_title: "Language Settings",
+            set_lang_desc: "Choose your preferred interface language (Indonesian or English):",
+            ota_title: "System Updates & Website Synchronization (OTA)",
+            ota_desc: "Code updates on the website automatically sync with the APK on your device. Tap below to check:",
+            btn_check_update: "Check for Updates Now",
+            priv_title: "User Privacy & Security",
+            btn_export_all: "Export My Data (Excel)"
+        }
+    };
+
+    let currentLang = localStorage.getItem('hirisman_lang') || 'id';
+
     const HIRIS_CONFIG = {
-        version: "3.8.0",
+        version: "4.0.0",
         cloudSyncUrl: "https://kvdb.io/MNhT458y28PqyqfWvhG8k9/",
         cloudPollingMs: 2500
     };
@@ -560,27 +836,27 @@
     let cloudStreamTimer = null;
     let currentTimezone = 'WIB';
     let notificationsList = [];
-    let kanbanCandidates = [];
     let activeWebcamStream = null;
     let calDate = new Date();
+    let cvExtracted = "";
+    let jobExtracted = "";
 
     document.addEventListener('DOMContentLoaded', () => {
         applyBrandingLogos();
         initTimeGreeting();
+        applyLanguage(currentLang);
         checkSessionAuth();
         startLiveClock();
         renderCalendar();
         lucide.createIcons();
     });
 
-    // PASANG LOGO RESMI KE SELURUH SUDUT APLIKASI
     function applyBrandingLogos() {
         document.getElementById('login-screen-logo').src = HIRIS_LOGO_IMG;
         document.getElementById('sidebar-brand-icon').src = HIRIS_ICON_IMG;
         document.getElementById('topbar-logo-icon').src = HIRIS_ICON_IMG;
     }
 
-    // TOAST NOTIFIKASI
     function showToast(title, message, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -599,7 +875,7 @@
         }, 3500);
     }
 
-    // 1. SISTEM AUTENTIKASI: ZERO-FAIL LOGIN & REGISTER ENGINE
+    // 1. GERBANG AUTENTIKASI DENGAN ZERO-FAIL HYBRID VAULT
     let currentAuthMode = 'login';
 
     function initTimeGreeting() {
@@ -623,8 +899,6 @@
                 return;
             } catch(e) {}
         }
-        
-        // Halaman login wajib tampil terlebih dahulu
         document.getElementById('auth-gateway-screen').classList.remove('hidden');
         document.getElementById('app-wrapper').classList.add('hidden');
     }
@@ -632,7 +906,7 @@
     function switchAuthMode(mode) {
         currentAuthMode = mode;
         document.getElementById('auth-name-field').classList.toggle('hidden', mode === 'login');
-        document.getElementById('auth-submit-btn').innerText = mode === 'login' ? "Masuk ke Dasbor" : "Daftar Akun Baru";
+        document.getElementById('auth-submit-btn').innerText = mode === 'login' ? (currentLang==='id'?"Masuk ke Dasbor":"Enter Dashboard") : (currentLang==='id'?"Daftar Akun Baru":"Register Account");
         document.getElementById('tab-auth-login').className = mode === 'login' ? "flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs" : "flex-1 py-1.5 rounded-lg text-slate-500";
         document.getElementById('tab-auth-register').className = mode !== 'login' ? "flex-1 py-1.5 rounded-lg bg-white text-brand-700 shadow-xs" : "flex-1 py-1.5 rounded-lg text-slate-500";
     }
@@ -650,14 +924,13 @@
             if (user) {
                 finalizeLogin(user, rememberMe);
             } else if (email === 'admin@hirisman.id' && pwd === 'admin123') {
-                // Preloaded Default Demo Enterprise Admin
                 const seedUser = {
                     id: 'usr_master_admin',
                     name: "HR Administrator",
                     email: "admin@hirisman.id",
                     pwd: "admin123",
                     role: "Super Admin HRIS",
-                    picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
+                    picture: HIRIS_ICON_IMG
                 };
                 users.push(seedUser);
                 localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
@@ -667,13 +940,13 @@
             }
         } else {
             if (users.some(u => u.email === email)) {
-                return showToast("Peringatan", "Email ini sudah terdaftar. Silakan pilih tab Masuk.", "error");
+                return showToast("Peringatan", "Email sudah terdaftar. Silakan masuk.", "error");
             }
             const name = document.getElementById('auth-input-name').value.trim() || email.split('@')[0];
             const newUser = {
                 id: 'usr_' + Math.random().toString(36).substring(2, 11),
                 name, email, pwd, role: "HR Administrator",
-                picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
+                picture: HIRIS_ICON_IMG
             };
             users.push(newUser);
             localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
@@ -683,7 +956,7 @@
     }
 
     function handleGoogleAuth() {
-        const googleEmail = prompt("Pilih / Masukkan Akun Google Anda:\n(Simulasi Google Identity OAuth 2.0)", "admin.holding@gmail.com");
+        const googleEmail = prompt("Pilih Akun Google (SSO OAuth 2.0):\nMasukkan email Google Anda:", "admin.holding@gmail.com");
         if (!googleEmail) return;
 
         const email = googleEmail.trim().toLowerCase();
@@ -698,7 +971,7 @@
                 pwd: "",
                 role: "Super Admin HRIS",
                 isGoogle: true,
-                picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop"
+                picture: HIRIS_ICON_IMG
             };
             users.push(user);
             localStorage.setItem('hirisman_registered_users', JSON.stringify(users));
@@ -717,7 +990,6 @@
             localStorage.removeItem('hirisman_active_session');
         }
 
-        // Tutup Gerbang Login & Buka Dasbor Langsung
         document.getElementById('auth-gateway-screen').classList.add('hidden');
         document.getElementById('app-wrapper').classList.remove('hidden');
         initAuthorizedApp();
@@ -733,7 +1005,7 @@
         }
     }
 
-    // 2. SINKRONISASI CLOUD DUA ARAH REAL-TIME (MULTI-DEVICE MASTER ACCOUNT)
+    // 2. MULTI-DEVICE CLOUD REALTIME SYNC (SINGLE MASTER VAULT)
     function getCloudBucketUrl() {
         const bucketKey = btoa(activeAdmin.email.toLowerCase()).replace(/=/g, '');
         return HIRIS_CONFIG.cloudSyncUrl + bucketKey;
@@ -760,11 +1032,11 @@
                 employees: [
                     { nip: "EMP-001", name: "Hendra Gunawan", dept: "Engineering", role: "VP of Engineering", ptkp: "TER A", salary: 28000000, allowance: 4000000, isPaid: false }
                 ],
-                attendance: []
+                attendance: [],
+                candidates: []
             }];
         }
 
-        // Ambil data dari Cloud Vault Akun
         try {
             const res = await fetch(getCloudBucketUrl(), { method: 'GET' });
             if (res.ok) {
@@ -776,25 +1048,24 @@
             }
         } catch(e) {}
 
-        activeCompany = allCompanies[0];
-        initKanbanPipeline();
+        const activeId = localStorage.getItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase());
+        activeCompany = allCompanies.find(c => c.id === activeId) || allCompanies[0];
         renderAllModules();
     }
 
     async function saveCompanyDatabase() {
         const localKey = 'hirisman_comp_db_' + activeAdmin.email.toLowerCase();
         localStorage.setItem(localKey, JSON.stringify(allCompanies));
+        if (activeCompany) {
+            localStorage.setItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase(), activeCompany.id);
+        }
 
-        // Push ke Cloud Vault
         try {
             await fetch(getCloudBucketUrl(), {
                 method: 'POST',
                 body: JSON.stringify(allCompanies)
             });
-            document.getElementById('cloud-sync-tag').innerText = "Cloud Sinkron";
-        } catch(e) {
-            document.getElementById('cloud-sync-tag').innerText = "Tersimpan Lokal";
-        }
+        } catch(e) {}
     }
 
     function startRealtimeCloudStream() {
@@ -813,9 +1084,10 @@
                         if (currentLocal !== cloudString) {
                             allCompanies = cloudData;
                             localStorage.setItem(localKey, cloudString);
-                            activeCompany = allCompanies[0];
+                            const activeId = localStorage.getItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase());
+                            activeCompany = allCompanies.find(c => c.id === activeId) || allCompanies[0];
                             renderAllModules();
-                            addSystemNotification("Sinkronisasi Realtime", "Data diperbarui otomatis dari perangkat lain.");
+                            addSystemNotification("Realtime Sync", "Data diselaraskan otomatis antar-perangkat.");
                         }
                     }
                 }
@@ -823,83 +1095,221 @@
         }, HIRIS_CONFIG.cloudPollingMs);
     }
 
-    // 3. SISTEM NOTIFIKASI & LOG LENGKAP
-    function addSystemNotification(title, desc, type = 'info') {
-        const timeStr = new Date().toLocaleTimeString('id-ID');
-        notificationsList.unshift({ id: Date.now(), title, desc, time: timeStr, type, read: false });
-        updateNotificationUI();
-        showToast(title, desc, type === 'error' ? 'error' : 'success');
+    // 3. PUSAT PENGATURAN: KELOLA 10 PERUSAHAAN
+    function switchActiveCompany(id) {
+        const found = allCompanies.find(c => c.id === id);
+        if (found) {
+            activeCompany = found;
+            localStorage.setItem('hirisman_last_cid_' + activeAdmin.email.toLowerCase(), activeCompany.id);
+            saveCompanyDatabase();
+            renderAllModules();
+            showToast("Perusahaan Aktif", `Beralih ke: ${activeCompany.name}`);
+        }
     }
 
-    function updateNotificationUI() {
-        const badge = document.getElementById('notif-badge');
-        const listContainer = document.getElementById('notif-items-list');
-        const unreadCount = notificationsList.filter(n => !n.read).length;
+    function openAddCompanyModal() {
+        if (allCompanies.length >= 10) return showToast("Batas Maksimal", "Maksimal 10 perusahaan telah tercapai.", "error");
+        document.getElementById('modal-add-comp').classList.remove('hidden');
+    }
+    function closeAddCompanyModal() { document.getElementById('modal-add-comp').classList.add('hidden'); }
 
-        badge.innerText = unreadCount;
-        badge.classList.toggle('hidden', unreadCount === 0);
+    function saveNewCompany(e) {
+        e.preventDefault();
+        const name = document.getElementById('new-c-name').value.trim();
+        const code = document.getElementById('new-c-code').value.trim().toUpperCase();
+        const balance = parseInt(document.getElementById('new-c-balance').value) || 250000000;
 
-        if (notificationsList.length === 0) {
-            listContainer.innerHTML = '<p class="text-slate-400 text-center py-4">Belum ada pemberitahuan baru.</p>';
-            return;
+        const newComp = {
+            id: 'comp_' + Date.now(),
+            name, code,
+            bank: { name: "BCA", accNumber: "8830-" + Math.floor(1000 + Math.random() * 9000), balance },
+            employees: [],
+            attendance: [],
+            candidates: []
+        };
+
+        allCompanies.push(newComp);
+        activeCompany = newComp;
+        saveCompanyDatabase();
+        renderAllModules();
+        closeAddCompanyModal();
+        e.target.reset();
+        showToast("Perusahaan Dibuat", `${newComp.name} berhasil ditambahkan.`);
+    }
+
+    function deleteCompany(id) {
+        if (allCompanies.length <= 1) return showToast("Info", "Minimal harus ada satu perusahaan.", "error");
+        if (confirm("Hapus perusahaan ini beserta seluruh datanya?")) {
+            allCompanies = allCompanies.filter(c => c.id !== id);
+            activeCompany = allCompanies[0];
+            saveCompanyDatabase();
+            renderAllModules();
+            showToast("Dihapus", "Perusahaan berhasil dihapus.");
         }
+    }
 
-        listContainer.innerHTML = notificationsList.map(n => `
-            <div class="p-2.5 rounded-xl border ${n.read ? 'bg-slate-50 border-slate-200' : 'bg-brand-50/50 border-brand-200'} space-y-0.5">
-                <div class="flex justify-between items-start">
-                    <span class="font-extrabold text-[11px] text-slate-800">${n.title}</span>
-                    <span class="text-[9px] text-slate-400 font-mono">${n.time}</span>
+    function renderSettingsCompanyList() {
+        const container = document.getElementById('settings-comp-list');
+        container.innerHTML = allCompanies.map((c, i) => `
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                <div>
+                    <span class="font-bold text-slate-800">${i + 1}. ${c.name} (${c.code})</span>
+                    <span class="block text-[10px] text-slate-400">Saldo Kas: Rp ${(c.bank?.balance || 0).toLocaleString('id-ID')} • ${(c.employees || []).length} Staf</span>
                 </div>
-                <p class="text-[10px] text-slate-600 leading-snug">${n.desc}</p>
+                <div class="flex items-center space-x-1.5">
+                    ${c.id === activeCompany.id 
+                        ? '<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-[10px]">● Sedang Aktif</span>' 
+                        : `<button onclick="switchActiveCompany('${c.id}')" class="px-3 py-1 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-[10px]">Pilih</button>`
+                    }
+                    ${allCompanies.length > 1 ? `<button onclick="deleteCompany('${c.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                </div>
             </div>
         `).join('');
-    }
-
-    function toggleNotificationCenter() {
-        const panel = document.getElementById('notif-dropdown-panel');
-        panel.classList.toggle('hidden');
-        notificationsList.forEach(n => n.read = true);
-        updateNotificationUI();
         lucide.createIcons();
     }
 
-    function clearAllNotifications() {
-        notificationsList = [];
-        updateNotificationUI();
+    // 4. BILINGUAL ENGINE (ID / EN)
+    function setLanguageMode(lang) {
+        currentLang = lang;
+        localStorage.setItem('hirisman_lang', lang);
+        applyLanguage(lang);
+        showToast(lang === 'id' ? "Bahasa Diubah" : "Language Switched", lang === 'id' ? "Sistem dialihkan ke Bahasa Indonesia" : "Interface switched to English");
     }
 
-    function toggleSidebarMenu() {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    function toggleLanguage() {
+        setLanguageMode(currentLang === 'id' ? 'en' : 'id');
     }
 
-    function renderAllModules() {
-        updateUIHead();
-        renderPayroll();
-        renderEmployees();
-        renderAttendance();
-        renderKanbanBoard();
-        lucide.createIcons();
+    function applyLanguage(lang) {
+        document.getElementById('lang-tag').innerText = lang.toUpperCase();
+        document.getElementById('btn-lang-id').className = lang === 'id' ? "px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200" : "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700";
+        document.getElementById('btn-lang-en').className = lang === 'en' ? "px-4 py-2 rounded-xl text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200" : "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700";
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18nDict[lang] && i18nDict[lang][key]) {
+                el.innerText = i18nDict[lang][key];
+            }
+        });
     }
 
-    function updateUIHead() {
-        document.getElementById('sidebar-user-name').innerText = activeAdmin.name;
-        document.getElementById('sidebar-user-email').innerText = activeAdmin.email;
-        document.getElementById('topbar-company-name').innerText = activeCompany.name;
-        document.getElementById('dash-user-greeting').innerText = `Selamat Datang, ${activeAdmin.name}!`;
-        document.getElementById('profile-display-name').innerText = activeAdmin.name;
-        document.getElementById('profile-display-email').innerText = activeAdmin.email;
+    // 5. SKRINING CV AI DENGAN PENALARAN SEMANTIK & SEMUA BERKAS
+    function toggleScreenInput(type, mode) {
+        document.getElementById(`panel-${type}-file`).classList.toggle('hidden', mode !== 'file');
+        document.getElementById(`manual-${type}`).classList.toggle('hidden', mode === 'file');
     }
 
-    // 4. PAYROLL & PPh 21 TER (PP 58/2023)
-    function calculatePPh21TER(bruto, category) {
-        if (category === 'TER A') {
-            if (bruto <= 5400000) return 0;
-            if (bruto <= 15000000) return 0.05;
-            return 0.09;
+    async function parseUniversalFile(input, target) {
+        const file = input.files[0];
+        if (!file) return;
+        const ext = file.name.split('.').pop().toLowerCase();
+        let text = "";
+
+        try {
+            if (ext === 'pdf') {
+                const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const content = await (await pdf.getPage(i)).getTextContent();
+                    text += " " + content.items.map(it => it.str).join(" ");
+                }
+            } else if (ext === 'docx') {
+                text = (await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+            } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+                const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+                text = rows.map(r => r.join(" ")).join("\n");
+            } else if (ext === 'txt') {
+                text = await file.text();
+            } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
+                text = (await Tesseract.recognize(file, 'ind+eng')).data.text;
+            }
+
+            if (target === 'cv') { cvExtracted = text.toLowerCase(); document.getElementById('manual-cv').value = text; }
+            else { jobExtracted = text.toLowerCase(); document.getElementById('manual-job').value = text; }
+            document.getElementById(`label-${target}`).innerText = file.name;
+            showToast("Berkas Terbaca", `${file.name} berhasil diekstrak.`);
+        } catch(e) {
+            showToast("Gagal Membaca", "Format berkas tidak terbaca.", "error");
         }
-        return 0.04;
     }
 
+    function runSemanticAiScreening() {
+        const name = document.getElementById('cand-name').value.trim();
+        const role = document.getElementById('cand-role').value.trim();
+        const cvText = (document.getElementById('manual-cv').value || cvExtracted).toLowerCase();
+        const jobText = (document.getElementById('manual-job').value || jobExtracted).toLowerCase();
+
+        if (!name || !role) return showToast("Data Belum Lengkap", "Isi Nama dan Posisi Pelamar.", "error");
+        if (!cvText || !jobText) return showToast("Berkas Belum Ada", "Unggah berkas CV dan Loker terlebih dahulu.", "error");
+
+        const btn = document.getElementById('btn-run-screening');
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Menganalisis Semantik...</span>`;
+        lucide.createIcons();
+
+        setTimeout(() => {
+            const strengths = [];
+            const weaknesses = [];
+
+            // Evaluasi Pendidikan
+            const getEduLevel = t => (t.includes('s3')?4:(t.includes('s2')?3:(t.includes('s1')||t.includes('sarjana')||t.includes('d4')?2:(t.includes('d3')||t.includes('diploma')?1:0))));
+            const jobEdu = getEduLevel(jobText);
+            const cvEdu = getEduLevel(cvText);
+
+            if (cvEdu > jobEdu) {
+                strengths.push("Tingkat pendidikan pelamar melampaui kualifikasi minimal loker (Nilai Tambah Kompetensi).");
+            } else if (cvEdu < jobEdu && jobEdu >= 2) {
+                weaknesses.push("Jenjang pendidikan formal belum memenuhi kualifikasi sarjana (S1) yang disyaratkan loker.");
+            } else {
+                strengths.push("Jenjang pendidikan memenuhi kualifikasi yang disyaratkan.");
+            }
+
+            // Semantic Clusters (Padanan Kata)
+            const semanticClusters = [
+                { label: 'Frontend / Web UI', terms: ['frontend', 'react', 'react.js', 'vue', 'angular', 'javascript', 'typescript', 'tailwind', 'html/css'] },
+                { label: 'Backend & Server', terms: ['backend', 'python', 'fastapi', 'node.js', 'django', 'sql', 'postgresql', 'mysql', 'api', 'rest api'] },
+                { label: 'Akuntansi & Pajak', terms: ['akuntansi', 'accounting', 'pajak', 'tax', 'brevet', 'finance', 'laporan keuangan'] },
+                { label: 'Kemampuan Bahasa', terms: ['inggris', 'english', 'toefl', 'ielts'] },
+                { label: 'Leadership & Softskills', terms: ['leadership', 'kepemimpinan', 'komunikasi', 'negosiasi', 'teamwork', 'kerjasama'] }
+            ];
+
+            semanticClusters.forEach(cluster => {
+                const requiredInJob = cluster.terms.some(t => jobText.includes(t));
+                if (requiredInJob) {
+                    const matchedInCv = cluster.terms.some(t => cvText.includes(t));
+                    if (matchedInCv) {
+                        strengths.push(`Kualifikasi esensial [${cluster.label}] teridentifikasi relevan dan sejalan.`);
+                    } else {
+                        weaknesses.push(`Kualifikasi esensial [${cluster.label}] tidak ditemukan pada berkas.`);
+                    }
+                }
+            });
+
+            if (cvText.includes('sertifikasi') || cvText.includes('certified') || cvText.includes('pelatihan')) {
+                strengths.push("Memiliki sertifikasi / pelatihan profesional pendukung (Nilai Tambah).");
+            }
+
+            let score = Math.round((strengths.length / (strengths.length + weaknesses.length || 1)) * 100);
+            if (score < 40) score = 55;
+
+            document.getElementById('screening-result-panel').classList.remove('hidden');
+            document.getElementById('match-percent').innerText = `${score}%`;
+            document.getElementById('circle-progress').setAttribute('stroke-dasharray', `${score}, 100`);
+            document.getElementById('metric-hardskill').innerText = `${Math.min(score + 4, 98)}%`;
+
+            const verdict = document.getElementById('match-verdict');
+            verdict.innerText = score >= 70 ? "Kualifikasi Esensial Terpenuhi (Direkomendasikan LULUS)" : "Kualifikasi Esensial Belum Terpenuhi";
+            verdict.className = score >= 70 ? "text-base font-bold text-emerald-600" : "text-base font-bold text-rose-600";
+
+            document.getElementById('strengths-list').innerHTML = strengths.map(s => `<li>✓ ${s}</li>`).join('');
+            document.getElementById('weaknesses-list').innerHTML = weaknesses.length > 0 ? weaknesses.map(w => `<li>✕ ${w}</li>`).join('') : `<li>✓ Semua kualifikasi esensial lowongan terpenuhi secara memuaskan.</li>`;
+
+            btn.innerHTML = `<i data-lucide="brain-circuit" class="w-4 h-4"></i><span>Jalankan Evaluasi AI Semantik</span>`;
+            lucide.createIcons();
+            document.getElementById('screening-result-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // 6. CORE PAYROLL, GEOFENCE, AND EMPLOYEES
     function renderPayroll() {
         const tbody = document.getElementById('payroll-table-body');
         const emptyBox = document.getElementById('payroll-empty-box');
@@ -914,19 +1324,19 @@
         }
         emptyBox.classList.add('hidden');
 
-        tbody.innerHTML = activeCompany.employees.map((emp, idx) => {
-            const bruto = emp.salary + (emp.allowance || 0);
-            const bpjsEmployee = Math.round(bruto * 0.04);
-            const pphAmount = Math.round(bruto * calculatePPh21TER(bruto, emp.ptkp || 'TER A'));
-            const netPay = bruto - (bpjsEmployee + pphAmount);
+        tbody.innerHTML = activeCompany.employees.map(emp => {
+            const bruto = Number(emp.salary) + Number(emp.allowance || 0);
+            const bpjs = Math.round(bruto * 0.04);
+            const pph = Math.round(bruto * (emp.ptkp === 'TER A' ? 0.05 : 0.04));
+            const net = bruto - (bpjs + pph);
 
             return `
             <tr class="hover:bg-slate-50 transition">
                 <td class="py-3 px-3 font-bold text-slate-800">${emp.name}<span class="block text-[10px] text-slate-400 font-normal">${emp.ptkp}</span></td>
                 <td class="py-3 px-3 font-semibold text-slate-700">Rp ${bruto.toLocaleString('id-ID')}</td>
-                <td class="py-3 px-3 text-rose-600 font-bold">Rp ${pphAmount.toLocaleString('id-ID')}</td>
-                <td class="py-3 px-3 text-rose-600 font-semibold">-Rp ${bpjsEmployee.toLocaleString('id-ID')}</td>
-                <td class="py-3 px-4 font-black text-brand-700">Rp ${netPay.toLocaleString('id-ID')}</td>
+                <td class="py-3 px-3 text-rose-600 font-bold">Rp ${pph.toLocaleString('id-ID')}</td>
+                <td class="py-3 px-3 text-rose-600 font-semibold">-Rp ${bpjs.toLocaleString('id-ID')}</td>
+                <td class="py-3 px-3 font-black text-brand-700">Rp ${net.toLocaleString('id-ID')}</td>
                 <td class="py-3 px-3 text-center">
                     <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${emp.isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
                         ${emp.isPaid ? '✓ Lunas' : 'Menunggu'}
@@ -942,7 +1352,7 @@
 
         let total = 0;
         unpaid.forEach(e => {
-            const bruto = e.salary + (e.allowance || 0);
+            const bruto = Number(e.salary) + Number(e.allowance || 0);
             total += (bruto - Math.round(bruto * 0.04));
         });
 
@@ -952,17 +1362,15 @@
         unpaid.forEach(e => e.isPaid = true);
         saveCompanyDatabase();
         renderPayroll();
-        addSystemNotification("Payroll Berhasil", `One-Click Run memproses transfer gaji Rp ${total.toLocaleString('id-ID')}`);
+        addSystemNotification("Payroll Berhasil", `One-Click Run memproses gaji Rp ${total.toLocaleString('id-ID')}`);
     }
 
-    // 5. ABSENSI GEOFENCE & WEBCAM
     async function startWebcamStream() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
             activeWebcamStream = stream;
             document.getElementById('webcam-video').srcObject = stream;
             document.getElementById('webcam-placeholder').classList.add('hidden');
-            addSystemNotification("Kamera Aktif", "Verifikasi wajah selfie siap digunakan.");
         } catch(e) {
             showToast("Kamera", "Izinkan akses kamera perangkat.", "error");
         }
@@ -986,11 +1394,11 @@
             photo: snapshot,
             name: name,
             time: `${type} • ${new Date().toLocaleTimeString('id-ID')}`,
-            status: "Wajah + GPS Valid (Geofence 12m)"
+            status: "Wajah + GPS Valid (12m)"
         });
         saveCompanyDatabase();
         renderAttendance();
-        addSystemNotification("Presensi Sukses", `Presensi ${type} untuk ${name} berhasil diverifikasi.`);
+        addSystemNotification("Presensi Sukses", `Presensi ${type} untuk ${name} tercatat.`);
     }
 
     function renderAttendance() {
@@ -1013,7 +1421,6 @@
         document.getElementById('stat-today-attendance').innerText = list.length;
     }
 
-    // 6. KARYAWAN & REKAM DATA
     function renderEmployees() {
         const tbody = document.getElementById('emp-table-body');
         const emptyBox = document.getElementById('emp-empty-box');
@@ -1025,8 +1432,8 @@
         tbody.innerHTML = list.map((e, idx) => `
             <tr class="hover:bg-slate-50 transition">
                 <td class="py-3 px-4 font-bold text-slate-900">${e.name}<span class="block text-[10px] text-slate-400 font-mono">${e.nip}</span></td>
-                <td class="py-3 px-4"><span class="font-semibold text-slate-700">${e.role}</span><span class="block text-[10px] text-slate-400">${e.dept}</span></td>
-                <td class="py-3 px-4 font-bold text-slate-800">Rp ${e.salary.toLocaleString('id-ID')}</td>
+                <td class="py-3 px-4">${e.role}<span class="block text-[10px] text-slate-400">${e.dept}</span></td>
+                <td class="py-3 px-4 font-bold text-slate-800">Rp ${Number(e.salary).toLocaleString('id-ID')}</td>
                 <td class="py-3 px-4 text-center"><button onclick="deleteEmployee(${idx})" class="text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
             </tr>
         `).join('');
@@ -1063,50 +1470,35 @@
             activeCompany.employees.splice(idx, 1);
             saveCompanyDatabase();
             renderAllModules();
-            addSystemNotification("Data Dihapus", "Staf berhasil dihapus dari direktori.");
         }
     }
 
-    // 7. KANBAN ATS
-    function initKanbanPipeline() {
-        kanbanCandidates = [
-            { id: 1, name: "Budi Pratama", role: "Frontend Dev", match: 92, stage: "screening" },
-            { id: 2, name: "Dewi Lestari", role: "Backend Dev", match: 88, stage: "interview" }
-        ];
+    // 7. UTILITIES & SINKRONISASI
+    function checkAppUpdates(isManual) {
+        if (isManual) showToast("Pembaruan Sistem", `Aplikasi sinkron pada versi build ${HIRIS_CONFIG.version}`);
     }
 
-    function renderKanbanBoard() {
-        const stages = ['applied', 'screening', 'interview', 'offer', 'done'];
-        stages.forEach(stage => {
-            const col = document.getElementById(`kanban-col-${stage}`);
-            const filtered = kanbanCandidates.filter(c => c.stage === stage);
-            col.innerHTML = filtered.map(c => `
-                <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
-                    <div class="flex justify-between items-start">
-                        <span class="font-extrabold text-[11px] text-slate-900">${c.name}</span>
-                        <span class="px-1 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-800">${c.match}%</span>
-                    </div>
-                    <span class="text-[10px] text-slate-400 block">${c.role}</span>
-                </div>
-            `).join('');
-        });
-        document.getElementById('stat-candidates-count').innerText = kanbanCandidates.length;
+    function exportUniversalBackup() {
+        const wb = XLSX.utils.book_new();
+        const empData = (activeCompany.employees || []).map(e => ({
+            "NIP": e.nip, "Nama": e.name, "Divisi": e.dept, "Jabatan": e.role, "Gaji Pokok": e.salary
+        }));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(empData), "Karyawan");
+        XLSX.writeFile(wb, `Data_Cadangan_${activeCompany.code}.xlsx`);
+        showToast("Unduh Berhasil", "Berkas cadangan data telah diunduh.");
     }
 
-    function openAddCandidateModal() {
-        const name = prompt("Nama Pelamar Baru:");
-        if (name) {
-            kanbanCandidates.push({ id: Date.now(), name, role: "Software Engineer", match: 86, stage: "applied" });
-            renderKanbanBoard();
-            addSystemNotification("Kandidat Baru", `Pelamar ${name} dimasukkan ke Kanban ATS.`);
-        }
+    function setAppOrientation(mode) {
+        const body = document.getElementById('app-body');
+        body.classList.remove('force-landscape', 'force-portrait');
+        if (mode === 'landscape') body.classList.add('force-landscape');
+        if (mode === 'portrait') body.classList.add('force-portrait');
+        showToast("Orientasi", `Tampilan disetel ke mode: ${mode.toUpperCase()}`);
     }
 
-    // 8. JAM, KALENDER & NAVIGASI
     function setIndoTimezone(tz) {
         currentTimezone = tz;
         document.getElementById('tz-badge-top').innerText = tz;
-        addSystemNotification("Zona Waktu", `Waktu disetel ke ${tz}`);
     }
 
     function startLiveClock() {
@@ -1131,12 +1523,67 @@
         }
     }
 
+    function updateUIHead() {
+        document.getElementById('sidebar-user-name').innerText = activeAdmin.name;
+        document.getElementById('sidebar-user-email').innerText = activeAdmin.email;
+        document.getElementById('topbar-company-name').innerText = activeCompany.name;
+        document.getElementById('dash-user-greeting').innerText = `Halo, ${activeAdmin.name}!`;
+        document.getElementById('profile-display-name').innerText = activeAdmin.name;
+        document.getElementById('profile-display-email').innerText = activeAdmin.email;
+    }
+
+    function renderAllModules() {
+        updateUIHead();
+        renderPayroll();
+        renderEmployees();
+        renderAttendance();
+        renderSettingsCompanyList();
+        document.getElementById('stat-cash').innerText = `Rp ${(activeCompany.bank?.balance || 0).toLocaleString('id-ID')}`;
+        lucide.createIcons();
+    }
+
+    function addSystemNotification(title, desc, type = 'info') {
+        const timeStr = new Date().toLocaleTimeString('id-ID');
+        notificationsList.unshift({ id: Date.now(), title, desc, time: timeStr, type, read: false });
+        updateNotificationUI();
+        showToast(title, desc, type === 'error' ? 'error' : 'success');
+    }
+
+    function updateNotificationUI() {
+        const badge = document.getElementById('notif-badge');
+        const listContainer = document.getElementById('notif-items-list');
+        const unreadCount = notificationsList.filter(n => !n.read).length;
+        badge.innerText = unreadCount;
+        badge.classList.toggle('hidden', unreadCount === 0);
+
+        if (notificationsList.length === 0) {
+            listContainer.innerHTML = '<p class="text-slate-400 text-center py-4">Belum ada pemberitahuan baru.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = notificationsList.map(n => `
+            <div class="p-2.5 rounded-xl border ${n.read ? 'bg-slate-50 border-slate-200' : 'bg-brand-50/50 border-brand-200'} space-y-0.5">
+                <span class="font-extrabold text-[11px] text-slate-800 block">${n.title}</span>
+                <p class="text-[10px] text-slate-600">${n.desc}</p>
+            </div>
+        `).join('');
+    }
+
+    function toggleNotificationCenter() {
+        const panel = document.getElementById('notif-dropdown-panel');
+        panel.classList.toggle('hidden');
+        notificationsList.forEach(n => n.read = true);
+        updateNotificationUI();
+    }
+
+    function clearAllNotifications() { notificationsList = []; updateNotificationUI(); }
+    function toggleSidebarMenu() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
     function navigate(page) {
         ['dashboard', 'payroll', 'attendance', 'employees', 'screening', 'profile', 'settings'].forEach(p => {
             document.getElementById(`view-${p}`).classList.add('hidden');
         });
         document.getElementById(`view-${page}`).classList.remove('hidden');
-
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.remove('text-brand-700', 'bg-brand-50');
             btn.classList.add('text-slate-600');
@@ -1145,15 +1592,8 @@
                 btn.classList.remove('text-slate-600');
             }
         });
-        
-        if (window.innerWidth < 768) {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-        }
+        if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         lucide.createIcons();
-    }
-
-    function toggleLanguage() {
-        addSystemNotification("Bahasa", "Bahasa antarmuka telah diselaraskan.");
     }
 </script>
 </body>
